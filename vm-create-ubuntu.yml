@@ -1,0 +1,53 @@
+--- # Version 1.0.0
+- hosts: localhost
+  vars_files:
+  - vars/vmware_vars.yml
+  vars_prompt:
+   - name: vm_name
+     prompt: Enter the name of the VM
+     private: no
+   - name: vm_network
+     prompt: Enter the name of the network for the VM
+     private: no
+   - name: vm_datastore
+     prompt: Enter the name of the datastore to put the VM on
+     private: no
+  tasks:
+   - name: Create a VM
+     delegate_to: localhost
+     vmware_guest:
+       esxi_hostname: "{{esx_hostname}}"
+       username: "{{esx_username}}"
+       password: "{{esx_password}}"
+       validate_certs: no
+       hostname: "{{esx_hostname}}"
+       folder: /ha-datacenter/vm/
+       name: "{{vm_name}}"
+       state: present
+       guest_id: ubuntu64Guest
+       hardware:
+         version: 14
+         hotadd_cpu: true
+         hotadd_memory: true
+         memory_mb: 1024
+         num_cpus: 1
+         scsi: paravirtual
+       disk:
+       - size_gb: 12
+         type: thin
+         disk_mode: persistent
+         datastore: "{{vm_datastore}}"
+       cdrom:
+         controller_type: ide
+         controller_number: 0
+         unit_number: 0
+         type: iso
+         iso_path: '[ISO] seed.iso'
+       networks:
+       - name: "{{vm_network}}"
+         device_type: vmxnet3
+       customvalues:
+       - key: sched.swap.dir
+         value: '/vmfs/volumes/local-ssd/swap'
+       wait_for_ip_address: no
+     register: deploy_vm

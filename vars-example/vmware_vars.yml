@@ -1,0 +1,4 @@
+---
+esx_hostname: hostname.domain
+esx_username: johndoe
+esx_password: password1234
