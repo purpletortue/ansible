@@ -1,0 +1,26 @@
+--- #Version 1.0.0
+- hosts: localhost
+  vars_files:
+  - vars/vmware_vars.yml
+  vars_prompt:
+  - name: vm
+    prompt: Enter the name of the VM
+    private: no
+  tasks:
+  - name: Variable check
+    fail:
+      msg: "This task requires the 'vm' variable to be set"
+    when: vm is undefined
+
+  - name: "Setting VMware swap location on {{vm}} vm"
+    become: no
+    vmware_guest:
+      hostname: "{{esx_hostname}}"
+      username: "{{esx_username}}"
+      password: "{{esx_password}}"
+      validate_certs: no
+      name: "{{vm}}"
+      customvalues:
+        - key: sched.swap.dir
+          value: "/vmfs/volumes/local-ssd/swap"
+    delegate_to: localhost
