@@ -1,0 +1,15 @@
+ansible
+certifi
+cffi
+chardet
+cryptography
+idna
+Jinja2
+MarkupSafe
+pkg-resources
+pycparser
+pyvmomi
+PyYAML
+requests
+six
+urllib3
