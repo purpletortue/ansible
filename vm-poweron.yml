@@ -1,4 +1,4 @@
---- #Version 1.0.0
+--- #Version 1.1.0
 - hosts: localhost
   vars_files:
   - vars/vmware_vars.yml
@@ -14,11 +14,11 @@
 
   - name: "Power on {{ vm }} vm"
     become: no
-    vmware_guest:
+    vmware_guest_powerstate:
       hostname: "{{esx_hostname}}"
       username: "{{esx_username}}"
       password: "{{esx_password}}"
-      validate_certs: no
+      validate_certs: yes
       name: "{{ vm }}"
-      state: poweredon
+      state: powered-on
     delegate_to: localhost
