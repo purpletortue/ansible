@@ -1,4 +1,4 @@
---- # Version 1.0.0
+--- # Version 1.1.0
 - hosts: localhost
   vars_files:
   - vars/vmware_vars.yml
@@ -8,9 +8,11 @@
      private: no
    - name: vm_network
      prompt: Enter the name of the network for the VM
+     default: "{{network_default}}"
      private: no
    - name: vm_datastore
      prompt: Enter the name of the datastore to put the VM on
+     default: "{{datastore_default}}"
      private: no
   tasks:
    - name: Create a VM
@@ -23,7 +25,7 @@
        hostname: "{{esx_hostname}}"
        folder: /ha-datacenter/vm/
        name: "{{vm_name}}"
-       state: present
+       state: poweredon
        guest_id: ubuntu64Guest
        hardware:
          version: 14
@@ -38,8 +40,13 @@
          disk_mode: persistent
          datastore: "{{vm_datastore}}"
        cdrom:
-         controller_type: ide
+       - controller_type: ide
          controller_number: 0
+         unit_number: 0
+         type: iso
+         iso_path: '[ISO] ubuntu-20.04-live-server-amd64.iso'
+       - controller_type: ide
+         controller_number: 1
          unit_number: 0
          type: iso
          iso_path: '[ISO] seed.iso'

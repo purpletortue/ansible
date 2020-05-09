@@ -2,3 +2,5 @@
 esx_hostname: hostname.domain
 esx_username: johndoe
 esx_password: password1234
+datastore_default: datastore1
+network_default: network1
