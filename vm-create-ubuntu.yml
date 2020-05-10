@@ -29,6 +29,7 @@
        guest_id: ubuntu64Guest
        hardware:
          version: 14
+         boot_firmware: efi
          hotadd_cpu: true
          hotadd_memory: true
          memory_mb: 1024
@@ -56,5 +57,7 @@
        customvalues:
        - key: sched.swap.dir
          value: '/vmfs/volumes/local-ssd/swap'
+       - key: bios.bootDelay
+         value: '3000'
        wait_for_ip_address: no
      register: deploy_vm
