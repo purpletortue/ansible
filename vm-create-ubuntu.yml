@@ -14,18 +14,21 @@
      prompt: Enter the name of the datastore to put the VM on
      default: "{{datastore_default}}"
      private: no
+   - name: vm_boot
+     prompt: Boot VM after creation?
+     default: 'Yes'
+     private: no
   tasks:
-   - name: Create a VM
+   - name: Create VM
      delegate_to: localhost
      vmware_guest:
-       esxi_hostname: "{{esx_hostname}}"
        username: "{{esx_username}}"
        password: "{{esx_password}}"
-       validate_certs: no
+       validate_certs: yes
        hostname: "{{esx_hostname}}"
        folder: /ha-datacenter/vm/
        name: "{{vm_name}}"
-       state: poweredon
+       state: present
        guest_id: ubuntu64Guest
        hardware:
          version: 14
@@ -57,7 +60,27 @@
        customvalues:
        - key: sched.swap.dir
          value: '/vmfs/volumes/local-ssd/swap'
-       - key: bios.bootDelay
-         value: '3000'
        wait_for_ip_address: no
      register: deploy_vm
+
+   - name: Configure VM boot settings
+     delegate_to: localhost
+     vmware_guest_boot_manager:
+       hostname: "{{esx_hostname}}"
+       username: "{{esx_username}}"
+       password: "{{esx_password}}"
+       validate_certs: yes
+       name: "{{vm_name}}"
+       boot_delay: 3000
+       secure_boot_enabled: True
+
+   - name: Boot VM
+     delegate_to: localhost
+     vmware_guest_powerstate:
+       hostname: "{{esx_hostname}}"
+       username: "{{esx_username}}"
+       password: "{{esx_password}}"
+       validate_certs: yes
+       name: "{{ vm_name }}"
+       state: powered-on
+     when: vm_boot|bool
