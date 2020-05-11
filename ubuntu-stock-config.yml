@@ -5,9 +5,9 @@
     become: yes
     apt:
       pkg:
-        - python-minimal
+        - python3-minimal
         - python3-venv
-        - python-apt
+        - python3-apt
       update_cache: yes
       cache_valid_time: 3600
       state: latest
