@@ -1,0 +1,28 @@
+---
+all:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+ubuntu:
+  children:
+    ubuntu_lan:
+      vars:
+        network: LAN
+      hosts:
+        server1.domain.com:
+        server2.domain.com:
+    ubuntu_lab:
+      vars:
+        ansible_user: lab
+        network: LAB
+      hosts:
+        server6.domain.com:
+
+vm:
+  hosts:
+    server1:
+    server2:
+    server3:
+    server4:
+    server5:
+    server6:
+...
