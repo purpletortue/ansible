@@ -42,3 +42,14 @@
     name: snapd
     state: absent
     autoremove: yes
+
+- name: configure syslog forwarding
+  become: yes
+  template:
+    src: 10-forward.conf
+    dest: /etc/rsyslog.d/10-forward.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: restart rsyslog
