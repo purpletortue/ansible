@@ -12,7 +12,7 @@ To install the ansible playbooks:
   pip3 install -r requirements.txt  
   Under playbooks, rename folder vars-example to vars and set vmware_vars.yml to appropriate values  
   Rename inventory-example to inventory and change hostnames to appropriate values  
-  
+
 
 
 TODO
@@ -25,6 +25,8 @@ TODO
 5. docker role
 6. apache2 role
 7. merge acme with ubuntu-stock
+8. add description of each playbook
+
 
 Copyright and License
 ---------------------
