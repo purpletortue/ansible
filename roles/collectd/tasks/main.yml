@@ -1,0 +1,53 @@
+---
+- name: Install or upgrade collectd
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: collectd
+    state: latest
+    autoremove: yes
+  environment:
+    RUNLEVEL: 1
+
+- name: Configure collectd
+  vars:
+    SERVER_NAME: "{{inventory_hostname}}"
+  become: yes
+  template:
+    src: collectd.j2
+    dest: /etc/collectd/collectd.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart collectd
+
+- name: Configure custom types
+  become: yes
+  template:
+    src: my_types.db
+    dest: /etc/collectd/my_types.db
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart collectd
+
+- name: Configure collectd to send to influxdb
+  become: yes
+  template:
+    src: collectd-influxdb.conf
+    dest: /etc/collectd/collectd.conf.d/collectd-influxdb.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart collectd
+
+- name: Remove graphite-tcp config
+  become: yes
+  file:
+    path: /etc/collectd/collectd.conf.d/graphite-tcp.conf
+    state: absent
+  notify: Restart collectd

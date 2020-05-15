@@ -28,10 +28,13 @@ To install the ansible playbooks:
 
 # Roles
 ----
-SNMP  
+COLLECTD
 --
-Requires 4 variables to be set in vars/main.yml  
-- Installs and configures snmpd.  
+Expects fqdn's for inventory host names  
+- Installs/updates collectd  
+- Configures collectd  
+- Copies custom types db  
+- Configures collectd to send data to influxdb server named 'collector'  
 
 SERVER
 --
@@ -40,9 +43,12 @@ Requires 'network' variable to be set in inventory file (see example)
 - Installs/updates aws cli  
 - Installs/updates cifs-utils  
 - Uninstalls/removes snapd  
-- Configures rsyslog to forward logs to a host named syslog  
+- Configures rsyslog to forward logs to a host named 'syslog'  
 
-
+SNMP  
+--
+Requires 4 variables to be set in vars/main.yml  
+- Installs and configures snmpd.  
 
 
 Copyright and License
