@@ -1,5 +1,10 @@
 ---
+# requires network variable to be set
 - hosts: ubuntu
   tasks:
     - include_role:
         name: server
+    - include_role:
+        name: collectd
+      when:
+        - network != 'DMZ' # skip this role on DMZ hosts
