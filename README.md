@@ -43,6 +43,11 @@ Expects fqdn's for inventory host names
 - Copies custom types db  
 - Configures collectd to send data to influxdb server named 'collector'  
 
+DOCKER
+--
+- Installs Official Docker repo  
+- Installs/updates docker-compose  
+
 SERVER
 --
 Requires 'network' variable to be set in inventory file (see example)  
