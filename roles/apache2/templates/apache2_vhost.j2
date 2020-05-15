@@ -1,0 +1,24 @@
+<IfModule mod_ssl.c>
+	<VirtualHost *:443>
+		ServerName {{ SERVER_NAME }}
+		ServerAdmin {{ apache_email }}
+		SSLEngine on
+		SSLCACertificateFile	/etc/ssl/certs/letsencrypt_ca.cer
+		SSLCertificateFile	/etc/ssl/certs/{{ SERVER_NAME_SHORT }}.pem
+		SSLCertificateKeyFile /etc/ssl/private/{{ SERVER_NAME_SHORT }}.key
+		SSLCertificateChainFile /etc/ssl/certs/{{ SERVER_NAME_SHORT }}_fullchain.cer
+		SSLCipherSuite EECDH+AESGCM:!aNULL:!MD5
+		SSLProtocol TLSv1.2
+
+		Header always set Strict-Transport-Security "max-age=31536000; includeSubdomains;"
+
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+### BEGIN ANSIBLE MANAGED BLOCK ###
+### END ANSIBLE MANAGED BLOCK ###
+
+	</VirtualHost>
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

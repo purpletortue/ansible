@@ -1,0 +1,75 @@
+---
+- name: Install Apache2 and modules
+  become: yes
+  apt:
+    pkg:
+      - apache2
+      - libapache2-mod-auth-openidc
+    update_cache: yes
+    cache_valid_time: 3600
+    state: latest
+    autoremove: yes
+
+- name: Enable Header module
+  become: yes
+  apache2_module:
+    state: present
+    name: headers
+
+- name: Enable SSL module
+  become: yes
+  apache2_module:
+    state: present
+    name: ssl
+
+- name: Disable Apache listening on port 80
+  become: yes
+  lineinfile:
+    path: /etc/apache2/ports.conf
+    state: present
+    regexp: '^Listen 80'
+    line: '#Listen 80'
+
+- name: Disable Ubuntu/Apache default site
+  become: yes
+  command: /usr/sbin/a2dissite 000-default
+  args:
+    removes: /etc/apache2/sites-enabled/000-default.conf
+
+- name: Remove default index page
+  become: yes
+  file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Copy acme cert to Ubuntu/Apache location
+  become: yes
+  shell: >
+    /root/.acme.sh/acme.sh -d "{{inventory_hostname}}" --install-cert
+    --cert-file /etc/ssl/certs/{{inventory_hostname_short}}.pem
+    --key-file /etc/ssl/private/{{inventory_hostname_short}}.key
+    --fullchain-file /etc/ssl/certs/{{inventory_hostname_short}}_fullchain.cer
+    --ca-file /etc/ssl/certs/letsencrypt_ca.cer
+    --reloadcmd "systemctl reload apache2"
+  args:
+    chdir: /root/.acme.sh/{{inventory_hostname}}
+    creates: /etc/ssl/certs/{{inventory_hostname_short}}.pem
+
+- name: Configure Apache Virtual Host
+  vars:
+    SERVER_NAME: "{{inventory_hostname}}"
+    SERVER_NAME_SHORT: "{{inventory_hostname_short}}"
+  become: yes
+  template:
+    src: apache2_vhost.j2
+    dest: /etc/apache2/sites-available/{{inventory_hostname_short}}.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+
+- name: Enable Apache Site
+  become: yes
+  command: /usr/sbin/a2ensite {{inventory_hostname_short}}
+  args:
+    creates: /etc/apache2/sites-enabled/{{inventory_hostname_short}}.conf

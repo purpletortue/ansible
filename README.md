@@ -13,19 +13,6 @@ To install the ansible playbooks:
   Rename inventory-example to inventory and change hostnames to appropriate values  
 
 
-
-# TODO
-
-1. dynamic inventories
-2. firewalld
-3. pw changes
-4. Add some error handling
-5. docker role
-6. apache2 role
-7. merge acme with ubuntu-stock
-8. add description of each playbook
-
-
 # Roles
 ----
 ACME
@@ -34,6 +21,18 @@ Requires 3 'le' variables to be set in vars/main.yml
 - Installs/upgrades acme  
 - Configures acme account info  
 - Generates server certificate (using aws dns validation)  
+
+APACHE2
+--
+Requires completion of acme role  
+Requires apache_email variable to be set in vars/main.yml
+- Installs/updates Apache2 & modules  
+- Enables Header/SSL modules  
+- Disables port 80 and the default site  
+- Removes default index.html page  
+- Copies ssl cert from acme to apache location  
+- Configures virtual host  
+- Enables virtual host ssl site  
 
 COLLECTD
 --
@@ -61,6 +60,19 @@ SNMP
 --
 Requires 4 variables to be set in vars/main.yml  
 - Installs and configures snmpd.  
+
+
+# TODO
+
+* dynamic inventories
+* firewalld
+* pw changes
+* apache2 role
+* merge acme with ubuntu-stock
+* add description of each playbook
+* auto-download all updates
+* auto-install security updates
+* smtp configuration
 
 
 Copyright and License
