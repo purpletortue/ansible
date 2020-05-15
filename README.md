@@ -1,7 +1,6 @@
 # ansible
 
-Requirements
-------------
+# Requirements
 
 To install the ansible playbooks:
 
@@ -15,8 +14,7 @@ To install the ansible playbooks:
 
 
 
-TODO
-----
+# TODO
 
 1. dynamic inventories
 2. firewalld
@@ -26,6 +24,25 @@ TODO
 6. apache2 role
 7. merge acme with ubuntu-stock
 8. add description of each playbook
+
+
+# Roles
+----
+SNMP  
+--
+Requires 4 variables to be set in vars/main.yml  
+- Installs and configures snmpd.  
+
+SERVER
+--
+Requires 'network' variable to be set in inventory file (see example)  
+- Installs/updates minimal set of Python3 modules  
+- Installs/updates aws cli  
+- Installs/updates cifs-utils  
+- Uninstalls/removes snapd  
+- Configures rsyslog to forward logs to a host named syslog  
+
+
 
 
 Copyright and License

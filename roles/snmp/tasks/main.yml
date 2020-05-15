@@ -1,0 +1,22 @@
+---
+- name: Install or upgrade snmpd
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: snmpd
+    state: latest
+    autoremove: yes
+  environment:
+    RUNLEVEL: 1
+
+- name: Configure snmpd
+  become: yes
+  template:
+    src: snmpd.j2
+    dest: /etc/snmp/snmpd.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart snmpd

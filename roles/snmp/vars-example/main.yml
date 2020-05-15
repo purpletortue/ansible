@@ -1,0 +1,5 @@
+---
+SNMP_CONTACT: email@address.com
+SNMP_LOCATION: VM
+SNMP_RO_COMMUNITY: public-ro
+SNMP_RW_COMMUNITY: private-rw
