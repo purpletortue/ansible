@@ -1,5 +1,5 @@
 ---
-- hosts: ubuntu_lan
+- hosts: ubuntu
   tasks:
   - include_role:
       name: server
