@@ -1,0 +1,5 @@
+---
+- hosts: ubuntu
+  tasks:
+  - include_role:
+      name: acme

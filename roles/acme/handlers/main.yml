@@ -1,0 +1,6 @@
+---
+- name: Cleanup installer
+  become: yes
+  file:
+    state: absent
+    path: /root/acme.sh

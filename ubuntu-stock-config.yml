@@ -4,7 +4,14 @@
   tasks:
     - include_role:
         name: server
+    - meta: flush_handlers
+
     - include_role:
         name: collectd
       when:
         - network != 'DMZ' # skip this role on DMZ hosts
+    - meta: flush_handlers
+
+    - include_role:
+        name: acme
+    - meta: flush_handlers

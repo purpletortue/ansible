@@ -28,6 +28,13 @@ To install the ansible playbooks:
 
 # Roles
 ----
+ACME
+--
+Requires 3 'le' variables to be set in vars/main.yml  
+- Installs/upgrades acme  
+- Configures acme account info  
+- Generates server certificate (using aws dns validation)  
+
 COLLECTD
 --
 Expects fqdn's for inventory host names  

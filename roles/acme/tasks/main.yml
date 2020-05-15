@@ -1,0 +1,66 @@
+---
+# requries 3 'le' variables to be set
+- name: Check for acme.sh
+  become: yes
+  stat:
+    path: /root/.acme.sh/acme.sh
+  register: acmesh
+
+- name: Copy installer
+  become: yes
+  copy:
+    src: files/acme.sh
+    dest: /root/acme.sh
+    owner: root
+    group: root
+    mode: u=rwx,g=rx
+  when: not acmesh.stat.exists
+  notify: Cleanup installer
+
+- name: Install acme
+  become: yes
+  command: /root/acme.sh --install
+  args:
+    chdir: /root
+    creates: /root/.acme.sh/acme.sh
+  when: not acmesh.stat.exists
+  register: b
+
+# - debug:
+#     msg: b.stdout_lines
+
+- name: Upgrade acme
+  become: yes
+  command: /root/.acme.sh/acme.sh --upgrade
+  args:
+    chdir: /root
+  register: c
+
+# - debug:
+#     msg: c.stdout_lines
+
+- name: Configure acme account
+  become: yes
+  blockinfile:
+    path: /root/.acme.sh/account.conf
+    backup: yes
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+      ACCOUNT_EMAIL='{{le_account_email}}'
+      SAVED_AWS_ACCESS_KEY_ID='{{le_aws_access_key_id}}'
+      SAVED_AWS_SECRET_ACCESS_KEY='{{le_aws_secret_access_key}}'
+      SAVED_AWS_DNS_SLOWRATE='5'
+
+- name: Check for server certificate
+  become: yes
+  stat:
+    path: "/root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.cer"
+  register: cert
+
+- name: Generate server cert
+  become: yes
+  command: /root/.acme.sh/acme.sh --issue --keylength 4096 --domain "{{inventory_hostname}}" --dns dns_aws
+  args:
+    chdir: /root
+    creates: "/root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.cer"
+  when: not cert.stat.exists
