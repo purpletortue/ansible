@@ -49,11 +49,6 @@
          unit_number: 0
          type: iso
          iso_path: '[ISO] ubuntu-20.04-live-server-amd64.iso'
-       - controller_type: ide
-         controller_number: 1
-         unit_number: 0
-         type: iso
-         iso_path: '[ISO] seed.iso'
        networks:
        - name: "{{vm_network}}"
          device_type: vmxnet3
