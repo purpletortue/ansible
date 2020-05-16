@@ -1,5 +1,5 @@
 ---
-- hosts: ubuntu
+- hosts: ubuntu:freenas
   tasks:
   - include_role:
       name: acme
