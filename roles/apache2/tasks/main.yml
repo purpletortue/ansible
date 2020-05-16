@@ -42,18 +42,13 @@
     path: /var/www/html/index.html
     state: absent
 
-- name: Copy acme cert to Ubuntu/Apache location
+- name: Enable Apache reload on cert renewal
   become: yes
-  shell: >
-    /root/.acme.sh/acme.sh -d "{{inventory_hostname}}" --install-cert
-    --cert-file /etc/ssl/certs/{{inventory_hostname_short}}.pem
-    --key-file /etc/ssl/private/{{inventory_hostname_short}}.key
-    --fullchain-file /etc/ssl/certs/{{inventory_hostname_short}}_fullchain.cer
-    --ca-file /etc/ssl/certs/letsencrypt_ca.cer
-    --reloadcmd "systemctl reload apache2"
-  args:
-    chdir: /root/.acme.sh/{{inventory_hostname}}
-    creates: /etc/ssl/certs/{{inventory_hostname_short}}.pem
+  lineinfile:
+    path: /root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.conf
+    state: present
+    regexp: 'Le_ReloadCmd='
+    line: "Le_ReloadCmd='systemctl reload apache2'"
 
 - name: Configure Apache Virtual Host
   vars:
