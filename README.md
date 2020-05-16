@@ -55,6 +55,8 @@ Requires 'network' variable to be set in inventory file (see example)
 - Installs/updates cifs-utils  
 - Uninstalls/removes snapd  
 - Configures rsyslog to forward logs to a host named 'syslog'  
+- Installs/udate ssmtp  
+- Configures ssmtp to send mail to a host named 'smtp'  
 
 SNMP  
 --

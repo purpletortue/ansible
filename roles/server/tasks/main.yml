@@ -45,3 +45,25 @@
     mode: u=rw,g=r,o=r
     backup: yes
   notify: restart rsyslog
+
+- name: Install & configure ssmtp # skip if smtp_server is defined for a host
+  block:
+  - name: Install/upgrade ssmtp
+    become: yes
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+      name: ssmtp
+      state: latest
+      autoremove: yes
+
+  - name: configure ssmtp
+    become: yes
+    template:
+      src: ssmtp.j2
+      dest: /etc/ssmtp/ssmtp.conf
+      owner: root
+      group: mail
+      mode: u=rw,g=r,o=
+      backup: yes
+  when: smtp_server is not defined
