@@ -1,0 +1,61 @@
+---
+- name: Add Netdata-edge GPG apt Key
+  become: yes
+  apt_key:
+    url: https://packagecloud.io/netdata/netdata-edge/gpgkey
+    state: present
+
+- name: Add Netdata-edge Repository
+  become: yes
+  apt_repository:
+    repo: deb https://packagecloud.io/netdata/netdata-edge/ubuntu/ {{ansible_distribution_release}} main
+    state: present
+    filename: netdata-edge
+    update_cache: yes
+
+- name: Install/update Netdata
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: netdata
+    state: latest
+    autoremove: yes
+  notify: Restart netdata
+
+- name: Configure Netdata
+  become: yes
+  template:
+    src: netdata.j2
+    dest: /etc/netdata/netdata.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart netdata
+
+- name: Add netdata user to ssl-cert group
+  become: yes
+  user:
+    name: netdata
+    state: present
+    append: yes
+    groups:
+      - ssl-cert
+  notify: Restart netdata
+
+- name: Create symlink for ssl cert
+  become: yes
+  file:
+    src: /etc/ssl/certs/{{inventory_hostname_short}}.pem
+    dest: /etc/netdata/ssl/cert.pem
+    state: link
+  notify: Restart netdata
+
+- name: Create symlink for ssl key
+  become: yes
+  file:
+    src: /etc/ssl/private/{{inventory_hostname_short}}.key
+    dest: /etc/netdata/ssl/key.pem
+    state: link
+  notify: Restart netdata

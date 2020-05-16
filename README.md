@@ -47,6 +47,14 @@ DOCKER
 - Installs Official Docker repo  
 - Installs/updates docker-compose  
 
+NETDATA
+--
+Requires completion of acme role  
+- Installs Official Netdata-edge repo (nightly)  
+- Installs/updates Netdata-edge  
+- Configures Netdata  
+- Configures SSL/TLS for Netdata  
+
 SERVER
 --
 Requires 'network' variable to be set in inventory file (see example)  

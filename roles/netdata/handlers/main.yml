@@ -1,0 +1,6 @@
+---
+- name: Restart netdata
+  become: yes
+  service:
+    name: netdata
+    state: restarted

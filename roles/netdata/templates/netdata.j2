@@ -1,0 +1,22 @@
+### ANSIBLE MANAGED FILE ###
+# netdata configuration
+
+[global]
+    run as user = netdata
+
+    # the default database size - 1 hour
+    history = 3600
+
+    # some defaults to run netdata with least priority
+    process scheduling policy = idle
+    OOM score = 1000
+
+[web]
+    web files owner = root
+    web files group = netdata
+
+    # by default do not expose the netdata port
+    bind to = *
+
+    #tls version = 1.3
+    #tls ciphers = TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
