@@ -1,22 +1,14 @@
 ---
-- name: Install/upgrade stock python modules
+- name: Install/upgrade standard packages
   become: yes
   apt:
     pkg:
       - python3-minimal
       - python3-venv
       - python3-apt
-    update_cache: yes
-    cache_valid_time: 3600
-    state: latest
-    autoremove: yes
-
-- name: Install/upgrade awscli & python module
-  become: yes
-  apt:
-    pkg:
-      - awscli
       - python3-boto3
+      - awscli
+      - net-tools
     update_cache: yes
     cache_valid_time: 3600
     state: latest
