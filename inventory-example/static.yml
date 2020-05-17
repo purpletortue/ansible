@@ -17,6 +17,16 @@ ubuntu:
       hosts:
         server6.domain.com:
 
+invoice_ninja:
+  hosts:
+    server1.domain.com:
+
+freenas:
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
+  hosts:
+    nas1.domain.com:
+    nas2.domain.com:
 vm:
   hosts:
     server1:
