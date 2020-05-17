@@ -53,6 +53,14 @@
     backup: yes
   notify: restart rsyslog
 
+- name: Configure timesyncd fallback
+  become: yes
+  lineinfile:
+    path: /etc/systemd/timesyncd.conf
+    state: present
+    regexp: 'FallbackNTP='
+    line: "FallbackNTP=ntp"
+
 - name: Install & configure ssmtp # skip if smtp_server is defined for a host
   block:
   - name: Install/upgrade ssmtp
