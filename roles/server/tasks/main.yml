@@ -61,7 +61,7 @@
     regexp: 'FallbackNTP='
     line: "FallbackNTP=ntp"
 
-- name: Install & configure ssmtp # skip if smtp_server is defined for a host
+- name: Install & configure ssmtp # skip if smtp_server is defined for a host or server is in DMZ
   block:
   - name: Install/upgrade ssmtp
     become: yes
@@ -81,4 +81,4 @@
       group: mail
       mode: u=rw,g=r,o=
       backup: yes
-  when: smtp_server is not defined
+  when: smtp_server is not defined and network != 'DMZ'
