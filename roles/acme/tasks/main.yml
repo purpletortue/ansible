@@ -77,3 +77,12 @@
     chdir: /root/.acme.sh/{{inventory_hostname}}
     creates: /etc/ssl/certs/{{inventory_hostname_short}}.pem
   when: ansible_distribution == 'Ubuntu'
+
+- name: Set perms on ssl key
+  become: yes
+  file:
+    path: /etc/ssl/private/{{inventory_hostname_short}}.key
+    state: file
+    owner: root
+    group: ssl-cert
+    mode: u=rw,g=r,o=
