@@ -14,6 +14,13 @@
 [web]
     web files owner = root
     web files group = netdata
+    web server threads = 2
+
+    allow connections from = localhost 10.*
+    allow dashboard from = localhost 10.*
+    allow badges from = localhost 10.*
+    allow streaming from = localhost 10.*
+    allow netdata.conf from = localhost 10.*
 
     # by default do not expose the netdata port
     bind to = *
