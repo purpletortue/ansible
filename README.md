@@ -58,6 +58,7 @@ Requires completion of acme role
 SERVER
 --
 Requires 'network' variable to be set in inventory file (see example)  
+- Sets timezone
 - Installs/updates minimal set of Python3 modules  
 - Installs/updates aws cli  
 - Installs/updates cifs-utils  

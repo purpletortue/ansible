@@ -4,3 +4,9 @@
   service:
     name: rsyslog
     state: restarted
+
+- name: restart cron
+  become: yes
+  service:
+    name: cron
+    state: restarted
