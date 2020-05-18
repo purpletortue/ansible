@@ -10,12 +10,13 @@
   become: yes
   apt:
     pkg:
+      - awscli
+      - net-tools
       - python3-minimal
       - python3-venv
       - python3-apt
       - python3-boto3
-      - awscli
-      - net-tools
+      - unattended-upgrades
     update_cache: yes
     cache_valid_time: 3600
     state: latest
@@ -82,3 +83,59 @@
       mode: u=rw,g=r,o=
       backup: yes
   when: smtp_server is not defined and network != 'DMZ'
+
+- name: Set auto-download for package updates
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/10periodic
+    state: present
+    regexp: 'APT::Periodic::Download-Upgradeable-Packages'
+    line: 'APT::Periodic::Download-Upgradeable-Packages "1";'
+
+- name: Set autoclean for apt packages
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/10periodic
+    state: present
+    regexp: 'APT::Periodic::AutocleanInterval'
+    line: 'APT::Periodic::AutocleanInterval "7";'
+
+- name: Set mail notification for unattended-upgrade package
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Mail '
+    line: 'Unattended-Upgrade::Mail "root";'
+
+- name: Set autoremove unused kernel packages
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages'
+    line: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";'
+
+- name: Set autoremove new unused dependencies
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Remove-New-Unused-Dependencies'
+    line: 'Unattended-Upgrade::Remove-New-Unused-Dependencies "true";'
+
+- name: Set autoremove of unused packages
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Remove-Unused-Dependencies'
+    line: 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
+
+- name: Enable unattended-upgrades loggin to syslog
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::SyslogEnable'
+    line: 'Unattended-Upgrade::SyslogEnable "true";'

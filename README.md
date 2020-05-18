@@ -67,6 +67,7 @@ Requires 'network' variable to be set in inventory file (see example)
 - Configures fallback NTP server in timesyncd  
 - Installs/udate ssmtp  
 - Configures ssmtp to send mail to a host named 'smtp'  
+- Configures apt to auto download updates  
 
 SNMP  
 --
