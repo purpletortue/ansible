@@ -1,5 +1,14 @@
 ---
 # requries 3 'le' variables to be set
+- name: Install/update ssl-cert package
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: ssl-cert
+    state: latest
+    autoremove: yes
+
 - name: Check for acme.sh
   become: yes
   stat:
