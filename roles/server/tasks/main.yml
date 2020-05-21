@@ -17,6 +17,7 @@
       - python3-apt
       - python3-boto3
       - unattended-upgrades
+      - ssl-cert
     update_cache: yes
     cache_valid_time: 3600
     state: latest
@@ -83,6 +84,7 @@
       mode: u=rw,g=r,o=
       backup: yes
   when: smtp_server is not defined and network != 'DMZ'
+  tags: smtp
 
 - name: Set auto-download for package updates
   become: yes
@@ -91,6 +93,7 @@
     state: present
     regexp: 'APT::Periodic::Download-Upgradeable-Packages'
     line: 'APT::Periodic::Download-Upgradeable-Packages "1";'
+  tags: unattended
 
 - name: Set autoclean for apt packages
   become: yes
@@ -99,6 +102,7 @@
     state: present
     regexp: 'APT::Periodic::AutocleanInterval'
     line: 'APT::Periodic::AutocleanInterval "7";'
+  tags: unattended
 
 - name: Set mail notification for unattended-upgrade package
   become: yes
@@ -107,6 +111,7 @@
     state: present
     regexp: 'Unattended-Upgrade::Mail '
     line: 'Unattended-Upgrade::Mail "root";'
+  tags: unattended
 
 - name: Set autoremove unused kernel packages
   become: yes
@@ -115,6 +120,7 @@
     state: present
     regexp: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages'
     line: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";'
+  tags: unattended
 
 - name: Set autoremove new unused dependencies
   become: yes
@@ -123,6 +129,7 @@
     state: present
     regexp: 'Unattended-Upgrade::Remove-New-Unused-Dependencies'
     line: 'Unattended-Upgrade::Remove-New-Unused-Dependencies "true";'
+  tags: unattended
 
 - name: Set autoremove of unused packages
   become: yes
@@ -131,6 +138,7 @@
     state: present
     regexp: 'Unattended-Upgrade::Remove-Unused-Dependencies'
     line: 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
+  tags: unattended
 
 - name: Enable unattended-upgrades loggin to syslog
   become: yes
@@ -139,3 +147,52 @@
     state: present
     regexp: 'Unattended-Upgrade::SyslogEnable'
     line: 'Unattended-Upgrade::SyslogEnable "true";'
+  tags: unattended
+
+- name: Create directory for apt-daily.timer override
+  become: yes
+  file:
+    path: /etc/systemd/system/apt-daily.timer.d
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags: unattended
+
+- name: Set apt-update time to 2300-2315
+  become: yes
+  copy:
+    content: |
+      [Timer]
+      OnCalendar=
+      OnCalendar=01:00
+      RandomizedDelaySec=15m
+    dest: /etc/systemd/system/apt-daily.timer.d/override.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags: unattended
+
+- name: Create directory for apt-daily-upgrade.timer override
+  become: yes
+  file:
+    path: /etc/systemd/system/apt-daily-upgrade.timer.d
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags: unattended
+
+- name: Set unattended-upgrade time to 0300-0310
+  become: yes
+  copy:
+    content: |
+      [Timer]
+      OnCalendar=
+      OnCalendar=03:00
+      RandomizedDelaySec=10m
+    dest: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags: unattended
