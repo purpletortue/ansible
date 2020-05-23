@@ -77,15 +77,10 @@ Requires 4 variables to be set in vars/main.yml
 
 # TODO
 
-* dynamic inventories
+* dynamic inventories (once vmware inv module works with standalone)
 * firewalld
 * pw changes
-* apache2 role
-* merge acme with ubuntu-stock
-* add description of each playbook
-* auto-download all updates
-* auto-install security updates
-* smtp configuration
+* cron backup management
 
 
 Copyright and License
