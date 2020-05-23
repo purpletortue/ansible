@@ -132,6 +132,5 @@ vars/
 ansible.cfg
 *.retry
 inventory
-playbooks/roles/test/**
 repo/**
 roles/test/**
