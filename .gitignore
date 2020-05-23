@@ -134,3 +134,4 @@ ansible.cfg
 inventory
 playbooks/roles/test/**
 repo/**
+roles/test/**
