@@ -9,7 +9,7 @@
     - include_role:
         name: collectd
       when:
-        - network != 'DMZ' # skip this role on DMZ hosts
+        - network != 'DMZ' and network != 'LAB' # skip this role on DMZ & LAB hosts
     - meta: flush_handlers
 
     - include_role:
