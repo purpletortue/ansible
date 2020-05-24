@@ -81,6 +81,7 @@ Requires 4 variables to be set in vars/main.yml
 * firewalld
 * pw changes
 * cron backup management
+* ups shutdown automation
 
 
 Copyright and License
