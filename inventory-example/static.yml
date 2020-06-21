@@ -27,6 +27,11 @@ freenas:
   hosts:
     nas1.domain.com:
     nas2.domain.com:
+
+esxi:
+  hosts:
+    esxihostname.domain.com:
+
 vm:
   hosts:
     server1:
