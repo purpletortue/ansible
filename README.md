@@ -9,7 +9,7 @@ To install the ansible playbooks:
 	python3 -m venv env  
 	source env/bin/activate  
   pip3 install -r requirements.txt  
-  Rename inventory-example to inventory and change/add hostnames to appropriate values  
+  Rename folder inventory-example to inventory and change/add hostnames to appropriate values  
   Rename folder vars-example to vars and set vmware_vars.yml to appropriate values  
   Rename any vars-example folders within roles to vars and set variables appropriately  
 
