@@ -74,14 +74,24 @@ SNMP
 Requires 4 variables to be set in vars/main.yml  
 - Installs and configures snmpd.  
 
+TELEGRAF
+--
+Expects fqdn's for inventory host names  
+Requires fqdn variable for influxdb_server in vars/main.yml  
+Requires completion of acme role  
+- Adds official Influxdata repo  
+- Installs/updates telegraf  
+- Configures telegraf  
+- Configures telegraf to send data to 'influxdb_server'  
+
 
 # TODO
 
-* dynamic inventories (once vmware inv module works with standalone)
-* firewalld
-* pw changes
-* cron backup management
-* ups shutdown automation
+* dynamic vm inventory (once vmware inv module works with standalone)  
+* firewalld  
+* pw changes (user & root)  
+* cron backup management  
+* convert ups shutdown automation  
 
 
 Copyright and License
