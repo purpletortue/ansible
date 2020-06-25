@@ -20,3 +20,12 @@
     name: docker-compose
     state: latest
     autoremove: yes
+
+- name: Create /opt/docker-compose directory
+  become: yes
+  file:
+    path: /opt/docker-compose
+    state: directory
+    owner: root
+    group: docker
+    mode: u=rwx,g=rx,o=
