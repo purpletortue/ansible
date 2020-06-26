@@ -1,5 +1,5 @@
 ---
-- hosts: ubuntu
+- hosts: ubuntu_lan
   tasks:
   - include_role:
       name: telegraf
