@@ -2,8 +2,4 @@
 - hosts: ubuntu
   tasks:
   - import_role:
-      name: acme
-  - meta: flush_handlers
-
-  - include_role:
       name: apache2

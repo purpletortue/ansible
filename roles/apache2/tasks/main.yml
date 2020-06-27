@@ -1,4 +1,8 @@
 ---
+- import_role:
+    name: acme
+- meta: flush_handlers
+
 - name: Install Apache2 and modules
   become: yes
   apt:
@@ -42,7 +46,7 @@
     path: /var/www/html/index.html
     state: absent
 
-- name: Enable Apache reload on cert renewal
+- name: Enable Apache reload on acme cert renewal
   become: yes
   lineinfile:
     path: /root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.conf
