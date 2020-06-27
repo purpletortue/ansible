@@ -1,5 +1,7 @@
 ---
+# role_version: 1.0.0
 # requries 3 'le' variables to be set
+# can handle Ubuntu & FreeNAS Operating Systems
 - name: Install/update ssl-cert package
   become: yes
   apt:
@@ -8,6 +10,7 @@
     name: ssl-cert
     state: latest
     autoremove: yes
+  when: ansible_distribution == 'Ubuntu'
 
 - name: Check for acme.sh
   become: yes
@@ -74,7 +77,7 @@
     creates: "/root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.cer"
   when: not cert.stat.exists
 
-- name: Install server cert #when Ubuntu
+- name: Install server cert (Ubuntu)
   become: yes
   shell: >
     /root/.acme.sh/acme.sh -d "{{inventory_hostname}}" --install-cert
@@ -87,7 +90,7 @@
     creates: /etc/ssl/certs/{{inventory_hostname_short}}.pem
   when: ansible_distribution == 'Ubuntu'
 
-- name: Set perms on ssl key
+- name: Set perms on ssl private key (Ubuntu)
   become: yes
   file:
     path: /etc/ssl/private/{{inventory_hostname_short}}.key
@@ -95,3 +98,5 @@
     owner: root
     group: ssl-cert
     mode: u=rw,g=r,o=
+  ignore_errors: "{{ansible_check_mode}}"
+  when: ansible_distribution == 'Ubuntu'
