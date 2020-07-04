@@ -134,3 +134,4 @@ ansible.cfg
 inventory
 repo/**
 roles/test/**
+app-files/
