@@ -196,3 +196,7 @@
     group: root
     mode: u=rw,g=r,o=r
   tags: unattended
+
+- include_tasks: cifs-mount.yml
+  when:
+    - network != 'DMZ' and network != 'LAB' # skip cifs configuration on DMZ and LAB hosts

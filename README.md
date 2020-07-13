@@ -58,6 +58,9 @@ Requires completion of acme role
 SERVER
 --
 Requires 'network' variable to be set in inventory file (see example)  
+Requires freenas variables to be set  
+Requires a server user account & share on freenas to pre-exist  
+Requires samba credential file variable to be set  
 - Sets timezone
 - Installs/updates minimal set of Python3 modules  
 - Installs/updates aws cli  
@@ -68,6 +71,10 @@ Requires 'network' variable to be set in inventory file (see example)
 - Installs/udate ssmtp  
 - Configures ssmtp to send mail to a host named 'smtp'  
 - Configures apt to auto download updates  
+- Creates 'nas' user/group  
+- Generates random password for freenas server user (if needed)  
+- Configures share mount under /mnt/nas  
+
 
 SNMP  
 --
@@ -92,6 +99,9 @@ Requires completion of acme role
 * pw changes (user & root)  
 * cron backup management  
 * convert ups shutdown automation  
+* add freenas user creation  
+* add freenas share configuration  
+* add freenas dataset creation  
 
 
 Copyright and License
