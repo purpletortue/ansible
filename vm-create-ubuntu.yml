@@ -1,4 +1,4 @@
---- # Version 1.2.0
+--- # Version 1.3.0
 - hosts: localhost
   vars_files:
   - vars/vmware_vars.yml
@@ -56,6 +56,8 @@
        customvalues:
        - key: sched.swap.dir
          value: '/vmfs/volumes/local-ssd/swap'
+       - key: disk.EnableUUID
+         value: "TRUE"
        wait_for_ip_address: no
      register: deploy_vm
 
