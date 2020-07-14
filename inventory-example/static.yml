@@ -21,6 +21,10 @@ invoice_ninja:
   hosts:
     server1.domain.com:
 
+unifi_controller:
+  hosts:
+    server7.domain.com:
+
 freenas:
   vars:
     ansible_python_interpreter: /usr/local/bin/python3

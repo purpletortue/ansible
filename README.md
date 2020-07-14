@@ -14,6 +14,7 @@ To install the ansible playbooks:
   Rename any vars-example folders within roles to vars and set variables appropriately  
 
 # Roles
+* Note: Any playbook in this repo that expects another role to have been run will call that role automatically, but you have to make sure that those role variables are setup and ready to go before hand. For example, the Apache role will automatically call the Acme role so you don't have to, but *you* must make sure the acme variables are set in the acme variables file.
 ----
 ACME
 --
@@ -25,7 +26,7 @@ Requires 3 'le' variables to be set in vars/main.yml
 APACHE2
 --
 Requires completion of acme role  
-Requires apache_email variable to be set in vars/main.yml
+Requires apache_email variable to be set in vars/main.yml  
 - Installs/updates Apache2 & modules  
 - Enables Header/SSL modules  
 - Disables port 80 and the default site  
@@ -91,6 +92,20 @@ Requires completion of acme role
 - Configures telegraf  
 - Configures telegraf to send data to 'influxdb_server'  
 
+# Applications
+* Note: All application deployments/configurations below are expecting the SERVER role to have been applied/configured already.
+----
+
+Unifi Controller
+--
+Expects 'unifi_controller' group in inventory file with an fqdn host entry  
+Requires completion of acme role  
+- Installs prerequisite packages  
+- Installs Official Unifi repo from Ubiquiti  
+- Installs/updates Unifi and MongoDB from unifi repo  
+- Adds unifi user to remote storage group (for backups)  
+- Configures Java with custom SSL/TLS cert  
+- Configures MongoDB and Unifi Controller  
 
 # TODO
 

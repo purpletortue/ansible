@@ -1,0 +1,5 @@
+---
+- hosts: unifi-controller
+  tasks:
+  - import_role:
+      name: unifi-controller

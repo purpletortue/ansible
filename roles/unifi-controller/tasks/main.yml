@@ -1,0 +1,170 @@
+---
+#role_version: "1.0.0"
+- import_role:
+    name: acme
+- meta: flush_handlers
+
+- name: Install Unifi Prerequisites
+#https://help.ui.com/hc/en-us/articles/220066768-UniFi-How-to-Install-and-Update-via-APT-on-Debian-or-Ubuntu
+  become: yes
+  apt:
+    pkg:
+      - ca-certificates
+      - apt-transport-https
+      - openjdk-8-jre-headless
+    update_cache: yes
+    cache_valid_time: 3600
+    state: latest
+    autoremove: yes
+
+- name: Set hold on Java 11 package
+  become: yes
+  dpkg_selections:
+    name: openjdk-11-jre-headless
+    selection: hold
+
+- name: Add Unifi GPG apt Key
+  become: yes
+  apt_key:
+    url: https://dl.ui.com/unifi/unifi-repo.gpg
+    state: present
+
+- name: Add Unifi Repository
+  become: yes
+  apt_repository:
+    repo: deb https://www.ui.com/downloads/unifi/debian stable ubiquiti
+    state: present
+    filename: unifi
+
+- name: Install Unifi (and MongoDB dependency)
+  become: yes
+  apt:
+    name: unifi
+    update_cache: yes
+    policy_rc_d: 101
+    state: latest
+  notify: Restart unifi
+
+- name: Add unifi user to nas group
+  become: yes
+  user:
+    name: unifi
+    groups: nas
+    append: yes
+  notify: Restart unifi
+
+# Prevents excessively large journal files
+# (only used if default MongoDB instance starts)
+# will no longer be needed after MongoDB 4.2
+- name: Add config option to MongoDB
+  become: yes
+  lineinfile:
+    path: /etc/mongodb.conf
+    state: present
+    regexp: '^smallfiles=true'
+    line: 'smallfiles=true'
+
+- name: Disable default MongoDB service
+  become: yes
+  systemd:
+    name: mongodb
+    enabled: no
+    state: stopped
+
+- name: Copy Unifi cert update script
+  vars:
+    SERVER_NAME: "{{inventory_hostname}}"
+  become: yes
+  template:
+    src: unifi_ssl_import.j2
+    dest: /root/.acme.sh/{{inventory_hostname}}/unifi_ssl_import.sh
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o=
+    backup: no
+
+- name: Enable import to java keystore on acme cert renewal
+  become: yes
+  lineinfile:
+    path: /root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.conf
+    state: present
+    regexp: 'Le_RenewHook='
+    line: "Le_RenewHook='/root/.acme.sh/{{inventory_hostname}}/unifi_ssl_import.sh'"
+
+- name: Check for java keystore
+  become: yes
+  stat:
+    path: /var/lib/unifi/keystore
+  register: keystore
+
+- name: Start Unifi service to generate initial config files
+  become: yes
+  systemd:
+    name: unifi
+    state: started
+  when: not keystore.stat.exists
+
+- name: Install ssl cert to java keystore #restarts unifi svc
+  become: yes
+  shell: >
+    /root/.acme.sh/{{inventory_hostname}}/unifi_ssl_import.sh
+  args:
+    chdir: /root/.acme.sh/{{inventory_hostname}}
+    creates: /var/lib/unifi/keystore.orig
+
+#Prevents excessively large journal files
+#will no longer be needed after MongoDB 4.2
+- name: Add db config option to Unifi system.properties
+  become: yes
+  lineinfile:
+    path: /var/lib/unifi/system.properties
+    state: present
+    regexp: 'unifi.db.extraargs='
+    line: "unifi.db.extraargs=--smallfiles"
+  notify: Restart unifi
+
+#https://help.ui.com/hc/en-us/articles/205202580-UniFi-Explaining-the-system-properties-File
+- name: Enable hsts config option to Unifi system.properties
+  become: yes
+  lineinfile:
+    path: /var/lib/unifi/system.properties
+    state: present
+    regexp: 'unifi.https.hsts='
+    line: "unifi.https.hsts=true"
+  notify: Restart unifi
+
+- name: Add hsts age config option to Unifi system.properties
+  become: yes
+  lineinfile:
+    path: /var/lib/unifi/system.properties
+    state: present
+    regexp: 'unifi.https.hsts.max_age='
+    line: "unifi.https.hsts.max_age=31536000"
+  notify: Restart unifi
+
+- name: Add hsts preload config option to Unifi system.properties
+  become: yes
+  lineinfile:
+    path: /var/lib/unifi/system.properties
+    state: present
+    regexp: 'unifi.https.hsts.preload='
+    line: "unifi.https.hsts.preload=false"
+  notify: Restart unifi
+
+- name: Add hsts subdomain config option to Unifi system.properties
+  become: yes
+  lineinfile:
+    path: /var/lib/unifi/system.properties
+    state: present
+    regexp: 'unifi.https.hsts.subdomain='
+    line: "unifi.https.hsts.subdomain=false"
+  notify: Restart unifi
+
+- name: Add hsts subdomain config option to Unifi system.properties
+  become: yes
+  lineinfile:
+    path: /var/lib/unifi/system.properties
+    state: present
+    regexp: 'autobackup.dir='
+    line: "autobackup.dir=/mnt/nas/backup"
+  notify: Restart unifi

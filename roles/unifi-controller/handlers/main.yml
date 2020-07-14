@@ -1,0 +1,6 @@
+---
+- name: Restart unifi
+  become: yes
+  service:
+    name: unifi
+    state: restarted
