@@ -1,7 +1,8 @@
---- # Version 1.1.0
+--- # Version 1.2.0
 - hosts: localhost
   vars_files:
   - vars/vmware_vars.yml
+  - vars/freenas_vars.yml
   vars_prompt:
    - name: vm_name
      prompt: Enter the name of the VM
@@ -66,8 +67,35 @@
        password: "{{esx_password}}"
        validate_certs: yes
        name: "{{vm_name}}"
+       boot_retry_enabled: False # does not work (bug in module)
        boot_delay: 3000
        secure_boot_enabled: True
+       boot_order:
+       - disk
+       - ethernet
+     register: vm_boot_order
+
+   - debug:
+       msg: "{{vm_boot_order.vm_boot_status}}"
+
+   - name: Start TFTP
+     uri:
+       url: https://{{freenas_hostname}}/api/v2.0/service/start
+       user: "{{freenas_username}}"
+       password: "{{freenas_password}}"
+       method: POST
+       body: >
+         {"service": "tftp",
+         "service-control": {
+           "onetime": true,
+           "wait": true,
+           "sync": true
+           }
+         }
+       force_basic_auth: yes
+       status_code: 200
+       body_format: json
+     when: vm_boot|bool
 
    - name: Boot VM
      delegate_to: localhost
