@@ -41,12 +41,12 @@
 # - debug:
 #     msg: b.stdout_lines
 
-- name: Upgrade acme
-  become: yes
-  command: /root/.acme.sh/acme.sh --upgrade
-  args:
-    chdir: /root
-  register: c
+# - name: Upgrade acme
+#   become: yes
+#   command: /root/.acme.sh/acme.sh --upgrade
+#   args:
+#     chdir: /root
+#   register: c
 
 # - debug:
 #     msg: c.stdout_lines

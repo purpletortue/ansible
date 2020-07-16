@@ -19,7 +19,7 @@ To install the ansible playbooks:
 ACME
 --
 Requires 3 'le' variables to be set in vars/main.yml  
-- Installs/upgrades acme  
+- Installs acme  
 - Configures acme account info  
 - Generates server certificate (using aws dns validation)  
 
@@ -117,6 +117,7 @@ Requires completion of acme role
 * add freenas user creation  
 * add freenas share configuration  
 * add freenas dataset creation  
+* Figure out how to upgrade acme only when necessary, existing method always shows as *changed  
 
 
 Copyright and License
