@@ -44,12 +44,18 @@ esxi:
   hosts:
     esxihostname.domain.com:
 
-vm:
+rpi0:
+  vars:
+    ansible_user: pi
   hosts:
-    server1:
-    server2:
-    server3:
-    server4:
-    server5:
-    server6:
+    server74.domain.com:
+
+# vm:
+#   hosts:
+#     server1:
+#     server2:
+#     server3:
+#     server4:
+#     server5:
+#     server6:
 ...
