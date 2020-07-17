@@ -25,6 +25,14 @@ unifi_controller:
   hosts:
     server7.domain.com:
 
+emby:
+  hosts:
+    server9.domain.com:
+
+plex:
+  hosts:
+    server10.domain.com:
+
 freenas:
   vars:
     ansible_python_interpreter: /usr/local/bin/python3
