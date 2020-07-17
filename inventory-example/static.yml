@@ -44,9 +44,10 @@ esxi:
   hosts:
     esxihostname.domain.com:
 
-rpi0:
+rpi:
   vars:
     ansible_user: pi
+    ansible_python_interpreter: /usr/bin/python3
   hosts:
     server74.domain.com:
 
