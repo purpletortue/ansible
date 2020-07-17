@@ -239,3 +239,51 @@
 - include_tasks: cifs-mount.yml
   when:
     - network != 'DMZ' and network != 'LAB' # skip cifs configuration on DMZ and LAB hosts
+
+- name: Set permissions on /mnt/nas for DMZ/LAB servers
+  become: yes
+  file:
+    path: /mnt/nas
+    state: directory
+    owner: nas
+    group: nas
+    mode: u=rwx,g=rwx,o=rx
+  when:
+    - network == 'DMZ' or network == 'LAB'
+
+- name: Checking for existing backup cron file
+  become: yes
+  stat:
+    path: /mnt/nas/backup/cron
+  register: backup_cron
+
+#if live file doesnt exist, restore it from backup location
+- name: Restore cron backup file if available
+  become: yes
+  copy:
+    dest: /etc/cron.d/backup
+    force: no
+    src: /mnt/nas/backup/cron
+    remote_src: yes
+  when: backup_cron.stat.exists
+
+- name: Configure cron backup entry
+  become: yes
+  blockinfile:
+    path: /etc/cron.d/backup
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+      00 0 * * * root /usr/bin/rsync -bu --suffix ".`date +'\%Y\%m\%d'`" /etc/cron.d/backup /mnt/nas/backup/cron
+
+- name: Set permissions on live cron backup file
+  become: yes
+  file:
+    path: /etc/cron.d/backup
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r

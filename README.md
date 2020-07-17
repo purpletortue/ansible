@@ -74,8 +74,9 @@ Requires samba credential file variable to be set
 - Configures apt to auto download updates  
 - Creates 'nas' user/group  
 - Generates random password for freenas server user (if needed)  
-- Configures share mount under /mnt/nas  
-
+- Configures dir/share mount at /mnt/nas  
+- Restores a backup cron file from /mnt/nas/cron if it exists  
+- Configures a backup cron file at /etc/cron.d/backup  
 
 SNMP  
 --
