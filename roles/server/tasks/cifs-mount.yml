@@ -1,33 +1,4 @@
 ---
-# - name: Create directory for storage mount
-#   become: yes
-#   file:
-#     path: /opt/{{inventory_hostname_short}}
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: u=,g=,o=
-
-- name: Create 'nas' group
-  become: yes
-  group:
-    name: nas
-    state: present
-    gid: 900
-    system: yes
-
-- name: Create 'nas' user
-  become: yes
-  user:
-    name: nas
-    state: present
-    system: yes
-    uid: 900
-    group: nas
-    home: /nonexistent
-    shell: /usr/sbin/nologin
-    create_home: no
-
 - name: Create Samba config directory
   become: yes
   file:
@@ -37,7 +8,7 @@
     group: root
     mode: u=rwx,g=rx,o=rx
 
-- name: Check credentials file
+- name: Check Samba credentials file
   become: yes
   stat:
     path: "{{samba_creds_file}}"
@@ -126,7 +97,7 @@
 
   when: not samba_creds.stat.exists
 
-- name: Add mount to fstab
+- name: Perma-mount central share
   become: yes
   mount:
     path: /mnt/nas

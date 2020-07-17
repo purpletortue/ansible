@@ -197,6 +197,45 @@
     mode: u=rw,g=r,o=r
   tags: unattended
 
+# nas user/group used for consistency even when not mounting remote filesystems
+- name: Create 'nas' group
+  become: yes
+  group:
+    name: nas
+    state: present
+    gid: 900
+    system: yes
+
+- name: Create 'nas' user
+  become: yes
+  user:
+    name: nas
+    state: present
+    system: yes
+    uid: 900
+    group: nas
+    home: /nonexistent
+    shell: /usr/sbin/nologin
+    create_home: no
+
+- name: Checking for central nas directory in /mnt
+  become: yes
+  stat:
+    path: /mnt/nas
+  register: nas
+
+# restricting permissions on mount target to prevent accidental writing when a mount error occurs.
+- name: Create /mnt/nas directory
+  become: yes
+  file:
+    path: /mnt/nas
+    state: directory
+    owner: nas
+    group: nas
+    mode: u=rx,g=rx,o=rx
+  when: not nas.stat.isdir is defined
+
+#mount centralized remote filesystems for non DMZ/LAB servers
 - include_tasks: cifs-mount.yml
   when:
     - network != 'DMZ' and network != 'LAB' # skip cifs configuration on DMZ and LAB hosts
