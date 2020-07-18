@@ -4,3 +4,9 @@
   file:
     state: absent
     path: /root/acme.sh
+
+- name: Upgrade acme
+  become: yes
+  command: /root/.acme.sh/acme.sh --upgrade
+  args:
+    chdir: /root

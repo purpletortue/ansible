@@ -1,8 +1,8 @@
 ---
-# role_version: 1.0.0
+# role_version: 1.1.0
 # requries 3 'le' variables to be set
-# can handle Ubuntu & FreeNAS Operating Systems
-- name: Install/update ssl-cert package
+# can handle Ubuntu, Debian, RaspberyOS, & FreeNAS Operating Systems
+- name: ssl-cert package
   become: yes
   apt:
     update_cache: yes
@@ -10,7 +10,8 @@
     name: ssl-cert
     state: latest
     autoremove: yes
-  when: ansible_distribution == 'Ubuntu'
+  when: ansible_distribution == 'Ubuntu' or
+        ansible_distribution == 'Debian'
 
 - name: Check for acme.sh
   become: yes
@@ -29,29 +30,18 @@
   when: not acmesh.stat.exists
   notify: Cleanup installer
 
-- name: Install acme
+- name: acme installed
   become: yes
   command: /root/acme.sh --install
   args:
     chdir: /root
     creates: /root/.acme.sh/acme.sh
   when: not acmesh.stat.exists
-  register: b
+  notify: Upgrade acme
 
-# - debug:
-#     msg: b.stdout_lines
+- meta: flush_handlers
 
-# - name: Upgrade acme
-#   become: yes
-#   command: /root/.acme.sh/acme.sh --upgrade
-#   args:
-#     chdir: /root
-#   register: c
-
-# - debug:
-#     msg: c.stdout_lines
-
-- name: Configure acme account
+- name: acme account configured
   become: yes
   blockinfile:
     path: /root/.acme.sh/account.conf
@@ -63,13 +53,13 @@
       SAVED_AWS_SECRET_ACCESS_KEY='{{le_aws_secret_access_key}}'
       SAVED_AWS_DNS_SLOWRATE='5'
 
-- name: Check for server certificate
+- name: Check server certificate
   become: yes
   stat:
     path: "/root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.cer"
   register: cert
 
-- name: Generate server cert
+- name: server cert
   become: yes
   command: /root/.acme.sh/acme.sh --issue --keylength 4096 --domain "{{inventory_hostname}}" --dns dns_aws
   args:
@@ -77,7 +67,7 @@
     creates: "/root/.acme.sh/{{inventory_hostname}}/{{inventory_hostname}}.cer"
   when: not cert.stat.exists
 
-- name: Install server cert (Ubuntu)
+- name: server cert installed (Ubuntu/Debian)
   become: yes
   shell: >
     /root/.acme.sh/acme.sh -d "{{inventory_hostname}}" --install-cert
@@ -88,9 +78,10 @@
   args:
     chdir: /root/.acme.sh/{{inventory_hostname}}
     creates: /etc/ssl/certs/{{inventory_hostname_short}}.pem
-  when: ansible_distribution == 'Ubuntu'
+  when: ansible_distribution == 'Ubuntu' or
+        ansible_distribution == 'Debian'
 
-- name: Set perms on ssl private key (Ubuntu)
+- name: ssl private key permissions (Ubuntu/Debian)
   become: yes
   file:
     path: /etc/ssl/private/{{inventory_hostname_short}}.key
@@ -99,4 +90,5 @@
     group: ssl-cert
     mode: u=rw,g=r,o=
   ignore_errors: "{{ansible_check_mode}}"
-  when: ansible_distribution == 'Ubuntu'
+  when: ansible_distribution == 'Ubuntu' or
+        ansible_distribution == 'Debian'

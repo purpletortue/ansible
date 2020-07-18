@@ -118,8 +118,8 @@ Requires completion of acme role
 * add freenas user creation  
 * add freenas share configuration  
 * add freenas dataset creation  
-* Figure out how to upgrade acme only when necessary, existing method always shows as *changed  
-
+* Figure out how to upgrade acme only when necessary, previous method always showed as *changed*  
+* Migrate most playbook/role variables to 'global' files (ie. group_vars)  
 
 Copyright and License
 ---------------------
