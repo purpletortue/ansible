@@ -140,7 +140,7 @@
     line: 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
   tags: unattended
 
-- name: Enable unattended-upgrades loggin to syslog
+- name: Enable unattended-upgrades logging to syslog
   become: yes
   lineinfile:
     path: /etc/apt/apt.conf.d/50unattended-upgrades
