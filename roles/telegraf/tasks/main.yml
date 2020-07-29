@@ -76,3 +76,32 @@
     mode: u=rw,g=r,o=r
     backup: yes
   notify: Restart telegraf
+
+# needed to pull gpu temps
+- name: telegraf group membership
+  become: yes
+  user:
+    name: telegraf
+    groups: video
+    append: yes
+  when:
+      - ansible_lsb.id == 'Raspbian'
+      - ansible_distribution == 'Debian'
+  notify: Restart telegraf
+
+- name: Telegraf Raspberry Pi input plugins
+  become: yes
+  copy:
+    src: files/inputs.pi.conf
+    dest: /etc/telegraf/telegraf.d/inputs.pi.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  when:
+      - ansible_lsb.id == 'Raspbian'
+      - ansible_distribution == 'Debian'
+  notify: Restart telegraf
+
+
+# TODO Add telegraf systemctl override file for collecter server
