@@ -251,6 +251,12 @@
   when:
     - network == 'DMZ' or network == 'LAB'
 
+- name: Directory /mnt/nas/backup
+  become: yes
+  file:
+    path: /mnt/nas/backup
+    state: directory
+
 - name: Checking for existing backup cron file
   become: yes
   stat:
