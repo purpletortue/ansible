@@ -1,0 +1,229 @@
+---
+#Version 1.0.0
+# TODO: Add the line below as a POSTINIT COMMAND in TrueNAS
+# /bin/ln -s /opt/telegraf/etc/telegraf.init /usr/local/etc/rc.d/telegraf; echo telegraf_enable=\"YES\" > /etc/rc.conf.d/telegraf; echo 'telegraf ALL=(ALL) NOPASSWD: /usr/local/sbin/smartctl, /usr/local/bin/ipmitool' >> /usr/local/etc/sudoers; service telegraf start
+- set_fact:
+    telegraf_os: "TrueNAS"
+
+- name: Get User ID Num for telegraf
+  uri:
+    url: https://{{inventory_hostname}}/api/v2.0/user?username=telegraf
+    user: "{{freenas_username}}"
+    password: "{{freenas_password}}"
+    method: GET
+    body_format: json
+    body: >
+      {
+      }
+    force_basic_auth: yes
+    status_code: 200
+  register: result
+
+- debug:
+    msg: "{{result.json}}"
+
+    #create user if when: "result.json|length == 0"
+- name: Fail if Freenas account doesn't exsit
+  fail:
+    msg: "No user named telegraf was found"
+  when: "result.json|length == 0"
+
+- name: Fail if multiple telegraf accounts exsit
+  fail:
+    msg: "More than one user named telegraf was found"
+  when: "result.json|length > 1"
+
+- set_fact:
+    freenasid: "{{ (result.json)[0].id }}"
+    uid: "{{ (result.json)[0].uid }}"
+    gid: "{{ (result.json)[0].group.bsdgrp_gid }}"
+    groupname: "{{ (result.json)[0].group.bsdgrp_group }}"
+  when: "result.json|length == 1"
+
+- name: Telegraf base directory (/opt/telegraf)
+  become: yes
+  file:
+    path: /opt/telegraf
+    state: directory
+    owner: telegraf
+    group: telegraf
+    mode: u=rwx,g=rx,o=r
+
+- name: Telegraf etc directory (/opt/telegraf/etc)
+  become: yes
+  file:
+    path: /opt/telegraf/etc
+    state: directory
+    owner: telegraf
+    group: telegraf
+    mode: u=rwx,g=rx,o=r
+
+- name: Telegraf etc directory (/opt/telegraf/etc/telegraf.d)
+  become: yes
+  file:
+    path: /opt/telegraf/etc/telegraf.d
+    state: directory
+    owner: telegraf
+    group: telegraf
+    mode: u=rwx,g=rx,o=r
+
+- name: Telegraf etc directory (/opt/telegraf/bin)
+  become: yes
+  file:
+    path: /opt/telegraf/bin
+    state: directory
+    owner: telegraf
+    group: telegraf
+    mode: u=rwx,g=rx,o=r
+
+- name: Telegraf binary
+  become: yes
+  copy:
+    src: "{{telegraf_binary}}"
+    dest: /opt/telegraf/bin/telegraf
+    owner: telegraf
+    group: telegraf
+    mode: u=rx,g=rx
+  notify: Restart telegraf
+
+- name: Telegraf rc init
+  become: yes
+  copy:
+    src: telegraf.init
+    dest: /opt/telegraf/etc/telegraf.init
+    owner: telegraf
+    group: telegraf
+    mode: u=rx,g=rx
+  notify: Restart telegraf
+
+- name: telegraf config
+  become: yes
+  template:
+    src: telegraf.j2
+    dest: /opt/telegraf/etc/telegraf.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=r,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+#requires influxdb_server variable
+- name: telegraf output to influxdb
+  become: yes
+  template:
+    src: outputs.influxdb.j2
+    dest: /opt/telegraf/etc/telegraf.d/outputs.influxdb.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=r,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: telegraf default input plugins
+  become: yes
+  copy:
+    src: inputs.default.conf
+    dest: /opt/telegraf/etc/telegraf.d/inputs.default.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=r,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: telegraf ipmi_sensor input plugin
+  become: yes
+  copy:
+    src: inputs.ipmi_sensor.conf
+    dest: /opt/telegraf/etc/telegraf.d/inputs.ipmi_sensor.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=r,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: telegraf smartctl input plugin
+  become: yes
+  copy:
+    src: inputs.smart.conf
+    dest: /opt/telegraf/etc/telegraf.d/inputs.smart.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=r,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: telegraf zfs input plugin
+  become: yes
+  copy:
+    src: inputs.zfs.conf
+    dest: /opt/telegraf/etc/telegraf.d/inputs.zfs.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=r,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: Configure telegraf x509 input plugin
+  become: yes
+  template:
+    src: inputs.x509_cert-url.j2
+    dest: /opt/telegraf/etc/telegraf.d/inputs.x509_cert.conf
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: telegraf rc init link
+  become: yes
+  file:
+    path: /usr/local/etc/rc.d/telegraf
+    state: link
+    src: /opt/telegraf/etc/telegraf.init
+  notify: Restart telegraf
+
+- name: telegraf service enable
+  become: yes
+  lineinfile:
+    path: /etc/rc.conf.d/telegraf
+    state: present
+    create: yes
+    owner: root
+    group: wheel
+    mode: u=rw,g=r,o=r
+    regexp: 'telegraf_enable='
+    line: 'telegraf_enable="YES"'
+  notify: Restart telegraf
+
+- name: telegraf smartctl sudoers
+  become: yes
+  lineinfile:
+    path: /usr/local/etc/sudoers
+    state: present
+    regexp: '^telegraf'
+    line: 'telegraf ALL=(ALL) NOPASSWD: /usr/local/sbin/smartctl, /usr/local/bin/ipmitool'
+
+# - name: Get PostInit Task
+#   uri:
+#     url: https://{{inventory_hostname}}/api/v2.0/initshutdownscript
+#     user: "{{freenas_username}}"
+#     password: "{{freenas_password}}"
+#     method: GET
+#     body_format: json
+#     body: >
+#       {
+#       }
+#     force_basic_auth: yes
+#     status_code: 200
+#   register: result
+# - debug:
+#     var: item
+#   loop: "{{ result.json | json_query('id') }}"
+    #msg: "{{result.json}}"
+#- fail:
+#    name: Fail if something happens
+#    msg: "Failed"
+#  when: "result.json|length == 0"
+
+#"{{ (result.json)[0].command }}"
+#"/usr/sbin/daemon -fcr -u telegraf"

@@ -1,7 +1,7 @@
 [[inputs.x509_cert]]
   interval = "300s"
 #   ## List certificate sources
-  sources = ["/etc/ssl/certs/{{ inventory_hostname_short }}.pem"]
+  sources = ["https://{{ inventory_hostname }}:443"]
 #
 #   ## Timeout for SSL connection
 #   # timeout = "5s"

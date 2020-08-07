@@ -56,6 +56,27 @@ Requires completion of acme role
 - Configures Netdata  
 - Configures SSL/TLS for Netdata  
 
+RPI
+--
+Requires 'network' variable to be set in inventory file (see example)  
+Requires freenas variables to be set  
+Requires a server user account AND share on freenas to pre-exist  
+Requires samba credential file variable to be set  
+- Sets timezone
+- Installs/updates minimal set of Python3 modules  
+- Installs/updates aws cli  
+- Installs/updates cifs-utils  
+- Configures rsyslog to forward logs to a host named 'syslog'  
+- Configures fallback NTP server in timesyncd  
+- Installs/udate ssmtp  
+- Configures ssmtp to send mail to a host named 'smtp'  
+- Configures apt to auto download updates  
+- Creates 'nas' user/group  
+- Generates random password for freenas server user (if needed)  
+- Configures dir/share mount at /mnt/nas  
+- Restores a backup cron file from /mnt/nas/cron if it exists  
+- Configures a backup cron file at /etc/cron.d/backup  
+
 SERVER
 --
 Requires 'network' variable to be set in inventory file (see example)  
@@ -88,7 +109,11 @@ TELEGRAF
 Expects fqdn's for inventory host names  
 Requires fqdn variable for influxdb_server in vars/main.yml  
 Requires completion of acme role  
-- Adds official Influxdata repo  
+Requires FreeNAS variables for API access  
+For FreeNAS hosts requires telegraf binary to be downloaded and path set in variables file  
+Requires 'telegraf' user to pre-exist on FreeNAS/TrueNAS hosts
+- Adds official Influxdata repo (except on Free/TrueNAS)  
+- Creates & copies files to /opt/telegraf on Free/TrueNAS  
 - Installs/updates telegraf  
 - Configures telegraf  
 - Configures telegraf to send data to 'influxdb_server'  
@@ -120,6 +145,7 @@ Requires completion of acme role
 * add freenas dataset creation  
 * Figure out how to upgrade acme only when necessary, previous method always showed as *changed*  
 * Migrate most playbook/role variables to 'global' files (ie. group_vars)  
+* add FreeNAS telegraf PostInit task via API when available(see freenas.yml file)  
 
 Copyright and License
 ---------------------

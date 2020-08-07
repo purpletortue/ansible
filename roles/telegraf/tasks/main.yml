@@ -1,107 +1,20 @@
 ---
-- name: Install Influxdata Repo Prerequisites
-  become: yes
-  apt:
-    pkg:
-      - apt-transport-https
-    update_cache: yes
-    cache_valid_time: 3600
-    state: latest
-    autoremove: yes
-
-- name: Add Influxdata apt key
-  become: yes
-  apt_key:
-    url: https://repos.influxdata.com/influxdb.key
-    state: present
-
-- name: Add Influxdata Repo
-  become: yes
-  apt_repository:
-    repo: deb https://repos.influxdata.com/{{ansible_distribution|lower}} {{ansible_distribution_release|lower}} stable
-    filename: influxdata
-    state: present
-
-- name: Install or upgrade telegraf
-  become: yes
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-    name: telegraf
-    state: latest
-    policy_rc_d: 101
-    autoremove: yes
-
-- name: Configure telegraf
-  become: yes
-  template:
-    src: telegraf.j2
-    dest: /etc/telegraf/telegraf.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-    backup: yes
-  notify: Restart telegraf
-
-#requires influxdb_server variable
-- name: Configure telegraf output to influxdb
-  become: yes
-  template:
-    src: outputs.influxdb.j2
-    dest: /etc/telegraf/telegraf.d/outputs.influxdb.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-    backup: yes
-  notify: Restart telegraf
-
-- name: Configure telegraf x509 input plugin
-  become: yes
-  template:
-    src: inputs.x509_cert.j2
-    dest: /etc/telegraf/telegraf.d/inputs.x509_cert.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-    backup: yes
-  notify: Restart telegraf
-
-- name: Configure telegraf default input plugins
-  become: yes
-  copy:
-    src: files/inputs.default.conf
-    dest: /etc/telegraf/telegraf.d/inputs.default.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-    backup: yes
-  notify: Restart telegraf
-
-# needed to pull gpu temps
-- name: telegraf group membership
-  become: yes
-  user:
-    name: telegraf
-    groups: video
-    append: yes
+- name: Telegraf Ubuntu tasks
+  include_tasks:
+    ubuntu.yml
   when:
-      - ansible_lsb.id == 'Raspbian'
-      - ansible_distribution == 'Debian'
-  notify: Restart telegraf
+    - ansible_distribution == 'Ubuntu'
+    - (network != 'DMZ') and (network != 'LAB')
 
-- name: Telegraf Raspberry Pi input plugins
-  become: yes
-  copy:
-    src: files/inputs.pi.conf
-    dest: /etc/telegraf/telegraf.d/inputs.pi.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-    backup: yes
+- name: Telegraf Raspberry Pi tasks
+  include_tasks:
+    raspberry.yml
   when:
-      - ansible_lsb.id == 'Raspbian'
-      - ansible_distribution == 'Debian'
-  notify: Restart telegraf
+    - (ansible_lsb.id is defined) and (ansible_lsb.id == 'Raspbian')
+    - ansible_distribution == 'Debian'
 
-
-# TODO Add telegraf systemctl override file for collecter server
+- name: Telgraf FreeNAS tasks
+  include_tasks:
+    freenas.yml
+  when:
+    - ansible_distribution == 'FreeBSD'
