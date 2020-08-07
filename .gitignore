@@ -135,3 +135,4 @@ inventory
 repo/**
 roles/test/**
 app-files/
+roles/telegraf/files/telegraf_*
