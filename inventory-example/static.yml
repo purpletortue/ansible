@@ -44,10 +44,19 @@ esxi:
   hosts:
     esxihostname.domain.com:
 
+rpi_w:
+  vars:
+    ansible_user: pi
+    ansible_python_interpreter: /usr/bin/python3
+    network: WIFI
+  hosts:
+    server75.domain.com:
+
 rpi:
   vars:
     ansible_user: pi
     ansible_python_interpreter: /usr/bin/python3
+    network: WIRED
   hosts:
     server74.domain.com:
 

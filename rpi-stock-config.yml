@@ -1,0 +1,58 @@
+---
+#Version: 1.0.0
+- hosts: rpi,rpi_w
+  gather_facts: False
+    # - name: Check ssh host key in known_hosts
+    #   local_action: shell ssh-keygen -F {{ inventory_hostname }}
+    #   register: checkForKnownHostsEntry
+    #   failed_when: false
+    #   changed_when: false
+    #   ignore_errors: yes
+    # - name: Add ssh host key to known hosts automatically
+    #   when: checkForKnownHostsEntry.rc == 1
+    #   changed_when: checkForKnownHostsEntry.rc == 1
+    #   set_fact:
+    #     ansible_ssh_common_args: '-o StrictHostKeyChecking=accept-new'
+
+  # pre_tasks needed to handle first-boot config of an rpi (ssh user key & set hostname)
+  pre_tasks:
+    - name: SSH User Public Key
+      vars:
+        - ansible_password: raspberry
+      authorized_key:
+        user: "pi"
+        key: https://github.com/{{github_username}}.keys
+        state: present
+        exclusive: yes
+      connection: paramiko
+
+    - name: Hostname
+      become: yes
+      hostname:
+        name: "{{inventory_hostname_short}}"
+
+    - name: Hostname (/etc/hosts)
+      become: yes
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '127.0.1.1'
+        line: "127.0.1.1\t{{inventory_hostname_short}}"
+
+    - name: Gather All Facts
+      setup:
+
+  tasks:
+    - include_role:
+       name: rpi
+    - meta: flush_handlers
+
+    - include_role:
+       name: acme
+    - meta: flush_handlers
+
+    - include_role:
+        name: telegraf
+      when:
+        - network != 'DMZ' and network != 'LAB' # skip this role on DMZ & LAB hosts
+    - meta: flush_handlers

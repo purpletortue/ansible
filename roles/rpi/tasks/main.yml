@@ -1,0 +1,301 @@
+---
+#Version 1.0.0
+- set_fact:
+    rpi_model: default
+
+- set_fact:
+    rpi_model: zero-w
+  when:
+    - ansible_machine == 'armv6l'
+
+- name: Require SUDO password for pi user
+  become: yes
+  file:
+    path: /etc/sudoers.d/010_pi-nopasswd
+    state: absent
+
+- name: Timezone (America/Los_Angeles)
+  become: yes
+  timezone:
+    name: America/Los_Angeles
+  notify: restart cron
+
+- name: Standard packages
+  become: yes
+  apt:
+    pkg:
+      - awscli
+      - net-tools
+      - python3-minimal
+      - python3-venv
+      - python3-apt
+      - python3-boto3
+      - unattended-upgrades
+      - apt-config-auto-update
+      - ssl-cert
+      - apt-transport-https
+    update_cache: yes
+    cache_valid_time: 3600
+    state: latest
+    autoremove: yes
+
+  # requires network variable to be set
+- name: cifs-utils package
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: cifs-utils
+    state: latest
+    autoremove: yes
+  when:
+    - network != 'DMZ' # skip this package on DMZ hosts
+
+- name: syslog forwarding
+  become: yes
+  template:
+    src: 10-forward.conf
+    dest: /etc/rsyslog.d/10-forward.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: restart rsyslog
+
+- name: timesyncd fallback
+  become: yes
+  lineinfile:
+    path: /etc/systemd/timesyncd.conf
+    state: present
+    regexp: 'FallbackNTP='
+    line: "FallbackNTP=ntp"
+
+- name: Install & configure ssmtp # skip if smtp_server is defined for a host or server is in DMZ
+  block:
+  - name: ssmtp package
+    become: yes
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+      name: ssmtp
+      state: latest
+      autoremove: yes
+
+  - name: ssmtp configuration
+    become: yes
+    template:
+      src: ssmtp.j2
+      dest: /etc/ssmtp/ssmtp.conf
+      owner: root
+      group: mail
+      mode: u=rw,g=r,o=
+      backup: yes
+  when: smtp_server is not defined and network != 'DMZ'
+
+- name: auto-download package updates
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/10periodic
+    state: present
+    regexp: 'APT::Periodic::Download-Upgradeable-Packages'
+    line: 'APT::Periodic::Download-Upgradeable-Packages "1";'
+  tags: unattended
+
+- name: autoclean for apt packages
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/10periodic
+    state: present
+    regexp: 'APT::Periodic::AutocleanInterval'
+    line: 'APT::Periodic::AutocleanInterval "7";'
+  tags: unattended
+
+- name: mail notification for unattended-upgrade package
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Mail '
+    line: 'Unattended-Upgrade::Mail "root";'
+  tags: unattended
+
+- name: autoremove unused kernel packages
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages'
+    line: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";'
+  tags: unattended
+
+- name: autoremove new unused dependencies
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Remove-New-Unused-Dependencies'
+    line: 'Unattended-Upgrade::Remove-New-Unused-Dependencies "true";'
+  tags: unattended
+
+- name: autoremove of unused packages
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::Remove-Unused-Dependencies'
+    line: 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
+  tags: unattended
+
+- name: unattended-upgrades logging to syslog
+  become: yes
+  lineinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
+    state: present
+    regexp: 'Unattended-Upgrade::SyslogEnable'
+    line: 'Unattended-Upgrade::SyslogEnable "true";'
+  tags: unattended
+
+- name: directory for apt-daily.timer override
+  become: yes
+  file:
+    path: /etc/systemd/system/apt-daily.timer.d
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags: unattended
+
+- name: apt-update time (2300-2315)
+  become: yes
+  copy:
+    content: |
+      [Timer]
+      OnCalendar=
+      OnCalendar=01:00
+      RandomizedDelaySec=15m
+    dest: /etc/systemd/system/apt-daily.timer.d/override.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags: unattended
+
+- name: directory for apt-daily-upgrade.timer override
+  become: yes
+  file:
+    path: /etc/systemd/system/apt-daily-upgrade.timer.d
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags: unattended
+
+- name: unattended-upgrade time (0300-0310)
+  become: yes
+  copy:
+    content: |
+      [Timer]
+      OnCalendar=
+      OnCalendar=03:00
+      RandomizedDelaySec=10m
+    dest: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags: unattended
+
+# nas user/group used for consistency even when not mounting remote filesystems
+- name: Create 'nas' group
+  become: yes
+  group:
+    name: nas
+    state: present
+    gid: 900
+    system: yes
+
+- name: Create 'nas' user
+  become: yes
+  user:
+    name: nas
+    state: present
+    system: yes
+    uid: 900
+    group: nas
+    home: /nonexistent
+    shell: /usr/sbin/nologin
+    create_home: no
+
+- name: Checking for central nas directory in /mnt
+  become: yes
+  stat:
+    path: /mnt/nas
+  register: nas
+
+# restricting permissions on mount target to prevent accidental writing when a mount error occurs.
+- name: Create /mnt/nas directory
+  become: yes
+  file:
+    path: /mnt/nas
+    state: directory
+    owner: nas
+    group: nas
+    mode: u=rx,g=rx,o=rx
+  when: not nas.stat.isdir is defined
+
+#mount centralized remote filesystems for non DMZ/LAB servers
+- include_tasks: cifs-mount.yml
+  when:
+    - network != 'DMZ' and network != 'LAB' # skip cifs configuration on DMZ and LAB hosts
+
+- name: Set permissions on /mnt/nas for DMZ/LAB servers
+  become: yes
+  file:
+    path: /mnt/nas
+    state: directory
+    owner: nas
+    group: nas
+    mode: u=rwx,g=rwx,o=rx
+  when:
+    - network == 'DMZ' or network == 'LAB'
+
+- name: Directory /mnt/nas/backup
+  become: yes
+  file:
+    path: /mnt/nas/backup
+    state: directory
+
+- name: Checking for existing backup cron file
+  become: yes
+  stat:
+    path: /mnt/nas/backup/cron
+  register: backup_cron
+
+#if live file doesnt exist, restore it from backup location
+- name: Restore cron backup file if available
+  become: yes
+  copy:
+    dest: /etc/cron.d/backup
+    force: no
+    src: /mnt/nas/backup/cron
+    remote_src: yes
+  when: backup_cron.stat.exists
+
+- name: Configure cron backup entry
+  become: yes
+  blockinfile:
+    path: /etc/cron.d/backup
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+      00 0 * * * root /usr/bin/rsync -bu --suffix ".`date +'\%Y\%m\%d'`" /etc/cron.d/backup /mnt/nas/backup/cron
+
+- name: Set permissions on live cron backup file
+  become: yes
+  file:
+    path: /etc/cron.d/backup
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
