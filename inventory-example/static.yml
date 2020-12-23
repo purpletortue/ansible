@@ -60,6 +60,15 @@ rpi:
   hosts:
     server74.domain.com:
 
+ups:
+  vars:
+    ansible_user: pi
+    ansible_python_interpreter: /usr/bin/python3
+    network: WIRED
+  hosts:
+    server3.domain.com:
+
+
 # vm:
 #   hosts:
 #     server1:

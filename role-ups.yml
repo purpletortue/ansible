@@ -1,0 +1,5 @@
+---
+- hosts: ups
+  tasks:
+  - include_role:
+      name: ups

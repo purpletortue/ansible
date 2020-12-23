@@ -118,6 +118,19 @@ Requires 'telegraf' user to pre-exist on FreeNAS/TrueNAS hosts
 - Configures telegraf  
 - Configures telegraf to send data to 'influxdb_server'  
 
+UPS
+--
+Requires completion of telegraf role  
+- Installs/updates apcupsd  
+- Configures apcupsd  
+- Configures telegraf to monitor ups  
+- Install git/python dependencies package  
+- Git clones ups-states GitHub repo (installed to /opt/ups-states)  
+- Note: ups-states has requirements for variable files to function correctly
+- Sets up python virtual environment  
+- Copies apcupsd scripts to call ups-states commands  
+
+
 # Applications
 * Note: All application deployments/configurations below are expecting the SERVER role to have been applied/configured already.
 ----

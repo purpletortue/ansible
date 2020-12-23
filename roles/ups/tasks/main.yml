@@ -1,0 +1,168 @@
+---
+- import_role:
+    name: telegraf
+- meta: flush_handlers
+
+- name: apcupsd package
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: apcupsd
+    state: latest
+    policy_rc_d: 101
+    autoremove: yes
+
+- name: UPS name {{inventory_hostname_short | upper}}
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    firstmatch: yes
+    regexp: '^UPSNAME '
+    insertafter: '^#UPSNAME$'
+    line: "UPSNAME {{inventory_hostname_short | upper}}"
+  notify: Restart apcupsd
+
+- name: UPS cable usb
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?UPSCABLE'
+    line: "UPSCABLE usb"
+  notify: Restart apcupsd
+
+- name: UPS type usb
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?UPSTYPE'
+    line: "UPSTYPE usb"
+  notify: Restart apcupsd
+
+- name: DEVICE empty
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^DEVICE'
+    line: "#DEVICE"
+  notify: Restart apcupsd
+
+- name: UPS polltime 60s
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?POLLTIME'
+    line: "POLLTIME 60"
+  notify: Restart apcupsd
+
+- name: UPS onbattery delay 120s
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?ONBATTERYDELAY'
+    line: "ONBATTERYDELAY 120"
+  notify: Restart apcupsd
+
+- name: UPS shutdown at 5% battery level
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?BATTERYLEVEL'
+    line: "BATTERYLEVEL 5"
+  notify: Restart apcupsd
+
+- name: UPS shutdown at 10 minutes battery remaining
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?MINUTES'
+    line: "MINUTES 10"
+  notify: Restart apcupsd
+
+- name: UPS beep disabled
+  become: yes
+  lineinfile:
+    path: /etc/apcupsd/apcupsd.conf
+    state: present
+    regexp: '^#?BEEPSTATE'
+    line: "BEEPSTATE N"
+  notify: Restart apcupsd
+
+- name: Configure telegraf to monitor UPS
+  become: yes
+  copy:
+    src: files/inputs.apcupsd.conf
+    dest: /etc/telegraf/telegraf.d/inputs.apcupsd.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+    backup: yes
+  notify: Restart telegraf
+
+- name: dependency packages (git/python)
+  become: yes
+  apt:
+    pkg:
+      - git
+      - python3-pip
+      - python3-venv
+      - python3-setuptools
+    update_cache: yes
+    cache_valid_time: 3600
+    state: latest
+    autoremove: yes
+
+- name: ups-states directory
+  become: yes
+  file:
+    path: /opt/ups-states
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=
+
+- name: ups-states scripts
+  become: yes
+  git:
+    repo: https://github.com/purpletortue/ups-states
+    dest: /opt/ups-states
+    force: yes
+    version: HEAD
+
+- name: vars directory
+  become: yes
+  file:
+    path: /opt/ups-states/vars
+    state: directory
+    owner: root
+    group: root
+    mode: u=rx,g=,o=
+
+- name: virtualenv config
+  become: yes
+  pip:
+    chdir: /opt/ups-states
+    virtualenv: /opt/ups-states/env
+    virtualenv_command: 'python3 -m venv'
+    requirements: /opt/ups-states/requirements.txt
+
+#TODO: Handle copying 'live' vars files into place
+
+- name: apcupsd onbattery script
+  become: yes
+  copy:
+    src: files/onbattery
+    dest: /etc/apcupsd/onbattery
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=r
+    backup: no
+  notify: Restart apcupsd

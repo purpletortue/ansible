@@ -1,0 +1,13 @@
+#!/usr/bin/env /usr/bin/bash
+
+cd /opt/ups-states
+source /opt/ups-states/env/bin/activate
+
+#echo ARG0=$0 >> /opt/ups-states/log.txt
+#echo ARG1=$1 >> /opt/ups-states/log.txt
+#echo ARG2=$2 >> /opt/ups-states/log.txt
+
+#TODO Send to syslog
+ansible-playbook set-state.yml -e state=onbattery &>> /opt/ups-states/log.txt
+
+exit 0
