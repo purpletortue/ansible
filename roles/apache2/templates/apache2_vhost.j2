@@ -1,7 +1,7 @@
 <IfModule mod_ssl.c>
 	<VirtualHost *:443>
 		ServerName {{ SERVER_NAME }}
-		ServerAdmin {{ apache_email }}
+		ServerAdmin {{ admin_email }}
 		SSLEngine on
 		SSLCACertificateFile	/etc/ssl/certs/letsencrypt_ca.cer
 		SSLCertificateFile	/etc/ssl/certs/{{ SERVER_NAME_SHORT }}.pem

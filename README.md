@@ -26,7 +26,7 @@ Requires 3 'le' variables to be set in vars/main.yml
 APACHE2
 --
 Requires completion of acme role  
-Requires apache_email variable to be set in vars/main.yml  
+Requires admin_email variable to be set in vars/main.yml  
 - Installs/updates Apache2 & modules  
 - Enables Header/SSL modules  
 - Disables port 80 and the default site  
