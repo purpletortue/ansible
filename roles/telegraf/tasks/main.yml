@@ -13,8 +13,8 @@
     - (ansible_lsb.id is defined) and (ansible_lsb.id == 'Raspbian')
     - ansible_distribution == 'Debian'
 
-- name: Telgraf FreeNAS tasks
+- name: Telgraf TrueNAS tasks
   include_tasks:
-    freenas.yml
+    truenas.yml
   when:
     - ansible_distribution == 'FreeBSD'

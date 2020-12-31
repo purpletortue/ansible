@@ -1,6 +1,6 @@
 ---
 influxdb_server: server.domain.com
-freenas_hostname: hostname.domain
-freenas_username: johndoe
-freenas_password: password1234
+truenas_hostname: hostname.domain
+truenas_username: johndoe
+truenas_password: password1234
 telegraf_binary: telegraf_1.14.4

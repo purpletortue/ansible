@@ -8,8 +8,8 @@
 - name: Get User ID Num for telegraf
   uri:
     url: https://{{inventory_hostname}}/api/v2.0/user?username=telegraf
-    user: "{{freenas_username}}"
-    password: "{{freenas_password}}"
+    user: "{{truenas_username}}"
+    password: "{{truenas_password}}"
     method: GET
     body_format: json
     body: >
@@ -23,7 +23,7 @@
     msg: "{{result.json}}"
 
     #create user if when: "result.json|length == 0"
-- name: Fail if Freenas account doesn't exsit
+- name: Fail if truenas account doesn't exsit
   fail:
     msg: "No user named telegraf was found"
   when: "result.json|length == 0"
@@ -34,7 +34,7 @@
   when: "result.json|length > 1"
 
 - set_fact:
-    freenasid: "{{ (result.json)[0].id }}"
+    truenasid: "{{ (result.json)[0].id }}"
     uid: "{{ (result.json)[0].uid }}"
     gid: "{{ (result.json)[0].group.bsdgrp_gid }}"
     groupname: "{{ (result.json)[0].group.bsdgrp_group }}"
@@ -206,8 +206,8 @@
 # - name: Get PostInit Task
 #   uri:
 #     url: https://{{inventory_hostname}}/api/v2.0/initshutdownscript
-#     user: "{{freenas_username}}"
-#     password: "{{freenas_password}}"
+#     user: "{{truenas_username}}"
+#     password: "{{truenas_password}}"
 #     method: GET
 #     body_format: json
 #     body: >

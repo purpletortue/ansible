@@ -1,5 +1,5 @@
 ---
-- hosts: freenas,ubuntu,rpi,rpi_w
+- hosts: truenas,ubuntu,rpi,rpi_w
   tasks:
   - include_role:
       name: telegraf
