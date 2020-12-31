@@ -1,5 +1,5 @@
 ---
-admin_email: email@address.com
+notify_email: email@address.com
 pwd_gen: "{{ lookup('password', '/dev/null length=40 chars=ascii_letters,digits,!@#^*()-_.,,') }}"
 samba_creds_file: "/path/to/samba-credentials-file"
 freenas_hostname: hostname.domain
