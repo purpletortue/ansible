@@ -1,18 +1,18 @@
 ---
-- name: Add Docker GPG apt Key
+- name: Docker GPG apt key
   become: yes
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
 
-- name: Add Official Docker Repository
+- name: Official Docker repo
   become: yes
   apt_repository:
     repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
     filename: docker
     state: present
 
-- name: Install docker-compose
+- name: docker-compose package
   become: yes
   apt:
     update_cache: yes
@@ -21,7 +21,7 @@
     state: latest
     autoremove: yes
 
-- name: Create /opt/docker-compose directory
+- name: /opt/docker-compose directory
   become: yes
   file:
     path: /opt/docker-compose
