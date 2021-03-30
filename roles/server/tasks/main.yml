@@ -1,5 +1,10 @@
 ---
 
+- name: Hostname
+  become: yes
+  hostname:
+    name: "{{inventory_hostname_short}}"
+
 - name: Set timezone to America/Los_Angeles
   become: yes
   timezone:
@@ -24,6 +29,17 @@
     state: latest
     autoremove: yes
 
+- name: Install/upgrade Pi specific packages
+  become: yes
+  apt:
+    pkg:
+      - libraspberrypi-bin
+    update_cache: yes
+    cache_valid_time: 3600
+    state: latest
+    autoremove: yes
+  when: ansible_architecture == 'aarch64'
+
 # requires network variable to be set
 - name: Install or upgrade cifs-utils
   become: yes
@@ -36,14 +52,15 @@
   when:
     - network != 'DMZ' # skip this package on DMZ hosts
 
-- name: Remove snapd
-  become: yes
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-    name: snapd
-    state: absent
-    autoremove: yes
+# Keeping snapd now for LXC/LXD mgmt 10feb2021
+# - name: Remove snapd
+#   become: yes
+#   apt:
+#     update_cache: yes
+#     cache_valid_time: 3600
+#     name: snapd
+#     state: absent
+#     autoremove: yes
 
 - name: configure syslog forwarding
   become: yes
