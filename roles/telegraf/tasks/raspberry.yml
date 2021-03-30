@@ -1,6 +1,7 @@
 ---
 - set_fact:
     telegraf_os: "Raspberry Pi OS"
+    telegraf_etc_dir: "/etc/telegraf"
 
 - name: Install Influxdata Repo Prerequisites
   become: yes
@@ -25,7 +26,7 @@
     filename: influxdata
     state: present
 
-- name: Install or upgrade telegraf
+- name: telegraf package
   become: yes
   apt:
     update_cache: yes
@@ -39,10 +40,10 @@
   become: yes
   template:
     src: telegraf.j2
-    dest: /etc/telegraf/telegraf.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    dest: "{{telegraf_etc_dir}}/telegraf.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
     backup: yes
   notify: Restart telegraf
 
@@ -51,10 +52,10 @@
   become: yes
   template:
     src: outputs.influxdb.j2
-    dest: /etc/telegraf/telegraf.d/outputs.influxdb.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    dest: "{{telegraf_etc_dir}}/telegraf.d/outputs.influxdb.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
     backup: yes
   notify: Restart telegraf
 
@@ -62,10 +63,10 @@
   become: yes
   template:
     src: inputs.x509_cert.j2
-    dest: /etc/telegraf/telegraf.d/inputs.x509_cert.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    dest: "{{telegraf_etc_dir}}/telegraf.d/inputs.x509_cert.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
     backup: yes
   notify: Restart telegraf
 
@@ -73,10 +74,10 @@
   become: yes
   copy:
     src: inputs.default.conf
-    dest: /etc/telegraf/telegraf.d/inputs.default.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    dest: "{{telegraf_etc_dir}}/telegraf.d/inputs.default.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
     backup: yes
   notify: Restart telegraf
 
@@ -84,10 +85,10 @@
   become: yes
   copy:
     src: inputs.systemd_units.conf
-    dest: /etc/telegraf/telegraf.d/inputs.systemd_units.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    dest: "{{telegraf_etc_dir}}/telegraf.d/inputs.systemd_units.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
     backup: yes
   notify: Restart telegraf
 
@@ -107,15 +108,23 @@
   become: yes
   copy:
     src: files/inputs.pi.conf
-    dest: /etc/telegraf/telegraf.d/inputs.pi.conf
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    dest: "{{telegraf_etc_dir}}/telegraf.d/inputs.pi.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
     backup: yes
   when:
       - ansible_lsb.id == 'Raspbian'
       - ansible_distribution == 'Debian'
   notify: Restart telegraf
 
+- name: influxdb Intermediate CA
+  become: yes
+  get_url:
+    url: https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+    dest: "{{telegraf_etc_dir}}/ca.pem"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
 
 # TODO Add telegraf systemctl override file for collecter server

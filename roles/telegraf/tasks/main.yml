@@ -6,7 +6,7 @@
     - ansible_distribution == 'Ubuntu'
     - (network != 'DMZ') and (network != 'LAB')
 
-- name: Telegraf Raspberry Pi tasks
+- name: Telegraf Raspberry Pi OS tasks
   include_tasks:
     raspberry.yml
   when:
