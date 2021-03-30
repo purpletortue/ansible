@@ -1,4 +1,6 @@
 ---
+# Ubuntu specific
+
 - name: Docker GPG apt key
   become: yes
   apt_key:
@@ -29,3 +31,29 @@
     owner: root
     group: docker
     mode: u=rwx,g=rx,o=
+
+- name: Check for telegraf
+  become: yes
+  stat:
+    path: /etc/telegraf/telegraf.d
+  register: telegraf
+
+- name: telegraf user in docker group
+  become: yes
+  user:
+    name: telegraf
+    groups: docker
+    append: yes
+  notify: Restart telegraf
+  when: telegraf.stat.isdir is defined
+
+- name: Configure telegraf docker plugin
+  become: yes
+  copy:
+    src: inputs.docker.conf
+    dest: "/etc/telegraf/telegraf.d/inputs.docker.conf"
+    owner: telegraf
+    group: telegraf
+    mode: u=rw,g=r,o=
+  notify: Restart telegraf
+  when: telegraf.stat.isdir is defined
