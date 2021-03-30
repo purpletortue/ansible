@@ -40,6 +40,13 @@ freenas:
     nas1.domain.com:
     nas2.domain.com:
 
+truenas:
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
+  hosts:
+    nas1.domain.com:
+    nas2.domain.com:
+
 esxi:
   hosts:
     esxihostname.domain.com:
@@ -68,6 +75,13 @@ ups:
   hosts:
     server3.domain.com:
 
+photo:
+  vars:
+    ansible_user: pi
+    ansible_python_interpreter: /usr/bin/python3
+    network: WIRED
+  hosts:
+    server13.domain.com:
 
 # vm:
 #   hosts:
