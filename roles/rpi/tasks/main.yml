@@ -290,7 +290,7 @@
     mode: u=rw,g=r,o=r
     marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
     block: |
-      00 0 * * * root /usr/bin/rsync -bu --suffix ".`date +'\%Y\%m\%d'`" /etc/cron.d/backup /mnt/nas/backup/cron
+      00 0 * * * root /usr/bin/rsync --inplace -bu --suffix ".`date +'\%Y\%m\%d'`" /etc/cron.d/backup /mnt/nas/backup/cron
 
 - name: Set permissions on live cron backup file
   become: yes
