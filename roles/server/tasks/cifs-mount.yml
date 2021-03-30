@@ -106,5 +106,5 @@
     backup: yes
     src: //{{freenas_hostname}}/{{inventory_hostname_short}}
     fstype: cifs
-    opts: vers=3,credentials={{samba_creds_file}},uid=nas,gid=nas,file_mode=0664,dir_mode=0775
+    opts: vers=3,credentials={{samba_creds_file}},uid=nas,gid=nas,file_mode=0664,dir_mode=0775,x-systemd.automount
     state: mounted
