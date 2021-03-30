@@ -60,31 +60,31 @@
     line: "POLLTIME 60"
   notify: Restart apcupsd
 
-- name: UPS onbattery delay 120s
+- name: UPS onbattery delay 60s
   become: yes
   lineinfile:
     path: /etc/apcupsd/apcupsd.conf
     state: present
     regexp: '^#?ONBATTERYDELAY'
-    line: "ONBATTERYDELAY 120"
+    line: "ONBATTERYDELAY 60"
   notify: Restart apcupsd
 
-- name: UPS shutdown at 5% battery level
+- name: UPS shutdown at % battery level disabled
   become: yes
   lineinfile:
     path: /etc/apcupsd/apcupsd.conf
     state: present
     regexp: '^#?BATTERYLEVEL'
-    line: "BATTERYLEVEL 5"
+    line: "BATTERYLEVEL -1"
   notify: Restart apcupsd
 
-- name: UPS shutdown at 10 minutes battery remaining
+- name: UPS shutdown at 2 minutes battery remaining
   become: yes
   lineinfile:
     path: /etc/apcupsd/apcupsd.conf
     state: present
     regexp: '^#?MINUTES'
-    line: "MINUTES 10"
+    line: "MINUTES 2"
   notify: Restart apcupsd
 
 - name: UPS beep disabled
