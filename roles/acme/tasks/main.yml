@@ -1,5 +1,5 @@
 ---
-# role_version: 1.1.0
+# role_version: 2.0.0
 # requries 3 'le' variables to be set
 # can handle Ubuntu, Debian, RaspberyOS, & FreeNAS Operating Systems
 - name: ssl-cert package
@@ -52,6 +52,7 @@
       SAVED_AWS_ACCESS_KEY_ID='{{le_aws_access_key_id}}'
       SAVED_AWS_SECRET_ACCESS_KEY='{{le_aws_secret_access_key}}'
       SAVED_AWS_DNS_SLOWRATE='5'
+      DEFAULT_ACME_SERVER='https://acme-v02.api.letsencrypt.org/directory'
 
 - name: Check server certificate
   become: yes
