@@ -212,6 +212,7 @@
     owner: telegraf
     group: telegraf
     mode: u=rw,g=r,o=
+  notify: Restart telegraf
 
 # - name: Get PostInit Task
 #   uri:

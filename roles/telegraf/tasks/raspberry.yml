@@ -126,5 +126,6 @@
     owner: telegraf
     group: telegraf
     mode: u=rw,g=r,o=
+  notify: Restart telegraf
 
 # TODO Add telegraf systemctl override file for collecter server
