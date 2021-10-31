@@ -207,7 +207,7 @@
 - name: influxdb Intermediate CA
   become: yes
   get_url:
-    url: https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem
+    url: https://letsencrypt.org/certs/lets-encrypt-r3.pem
     dest: "{{telegraf_etc_dir}}/ca.pem"
     owner: telegraf
     group: telegraf
